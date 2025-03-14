@@ -8,12 +8,13 @@ const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 interface CalendarProps {
   schedules: CronSchedule[];
   config: GridConfig;
+  selectedDate: Date;
+  onDateChange: (date: Date) => void;
 }
 
-export function Calendar({ schedules, config }: CalendarProps) {
+export function Calendar({ schedules, config, selectedDate, onDateChange }: CalendarProps) {
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const timeSlots = generateTimeSlots(schedules);
+  const timeSlots = generateTimeSlots(schedules, selectedDate, config.timezone);
 
   const getDaysInMonth = (date: Date) => {
     return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -28,15 +29,15 @@ export function Calendar({ schedules, config }: CalendarProps) {
   };
 
   const handlePrevMonth = () => {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1));
+    onDateChange(new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1));
   };
 
   const handleNextMonth = () => {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1));
+    onDateChange(new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1));
   };
 
-  const daysInMonth = getDaysInMonth(currentDate);
-  const firstDayOfMonth = getFirstDayOfMonth(currentDate);
+  const daysInMonth = getDaysInMonth(selectedDate);
+  const firstDayOfMonth = getFirstDayOfMonth(selectedDate);
   const days = Array.from({ length: 42 }, (_, i) => {
     const dayNumber = i - firstDayOfMonth + 1;
     return dayNumber > 0 && dayNumber <= daysInMonth ? dayNumber : null;
@@ -53,7 +54,7 @@ export function Calendar({ schedules, config }: CalendarProps) {
           >
             ←
           </button>
-          <h2 className="text-xl font-semibold">{getMonthName(currentDate)}</h2>
+          <h2 className="text-xl font-semibold">{getMonthName(selectedDate)}</h2>
           <button
             onClick={handleNextMonth}
             className="p-2 hover:bg-gray-100 rounded"
@@ -88,8 +89,8 @@ export function Calendar({ schedules, config }: CalendarProps) {
                     timeSlots={timeSlots.filter(
                       (slot) =>
                         slot.start.getDate() === day &&
-                        slot.start.getMonth() === currentDate.getMonth() &&
-                        slot.start.getFullYear() === currentDate.getFullYear()
+                        slot.start.getMonth() === selectedDate.getMonth() &&
+                        slot.start.getFullYear() === selectedDate.getFullYear()
                     )}
                     schedules={schedules}
                     stepSize={config.stepSize}

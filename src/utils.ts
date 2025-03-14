@@ -18,18 +18,30 @@ export function generateColor(index: number): string {
   return COLORS[index % COLORS.length];
 }
 
-export function parseCronExpression(expression: string): Date[] {
+export function parseCronExpression(
+  expression: string,
+  targetDate: Date = new Date(),
+  timezone: string = 'UTC'
+): Date[] {
   try {
-    const interval = parseExpression(expression);
-    const now = new Date();
-    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    const options = {
+      currentDate: targetDate,
+      tz: timezone,
+      endDate: new Date(targetDate.getFullYear(), targetDate.getMonth() + 1, 0, 23, 59, 59)
+    };
     
+    const interval = parseExpression(expression, options);
     const occurrences: Date[] = [];
-    let current = interval.next();
     
-    while (current.toDate() <= endOfMonth) {
-      occurrences.push(current.toDate());
-      current = interval.next();
+    try {
+      let current = interval.next();
+      while (current.toDate() <= options.endDate) {
+        occurrences.push(current.toDate());
+        current = interval.next();
+      }
+    } catch (err) {
+      // This is expected when we reach the end of the month
+      // The occurrences array will contain all valid dates up to that point
     }
     
     return occurrences;
@@ -39,13 +51,17 @@ export function parseCronExpression(expression: string): Date[] {
   }
 }
 
-export function generateTimeSlots(schedules: CronSchedule[]): TimeSlot[] {
+export function generateTimeSlots(
+  schedules: CronSchedule[],
+  targetDate: Date,
+  timezone: string = 'UTC'
+): TimeSlot[] {
   const timeSlots: TimeSlot[] = [];
 
   schedules.forEach((schedule) => {
     if (!schedule.isActive) return;
 
-    const occurrences = parseCronExpression(schedule.expression);
+    const occurrences = parseCronExpression(schedule.expression, targetDate, timezone);
     
     occurrences.forEach((start) => {
       const end = new Date(start.getTime() + schedule.duration * 60000);

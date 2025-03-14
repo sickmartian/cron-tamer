@@ -4,17 +4,10 @@ import { generateColor } from '../utils';
 
 interface CronScheduleTableProps {
   schedules: CronSchedule[];
-  onAddSchedule: (schedule: CronSchedule) => void;
-  onUpdateSchedule: (schedule: CronSchedule) => void;
-  onDeleteSchedule: (id: string) => void;
+  onSchedulesChange: (schedules: CronSchedule[]) => void;
 }
 
-export const CronScheduleTable: React.FC<CronScheduleTableProps> = ({
-  schedules,
-  onAddSchedule,
-  onUpdateSchedule,
-  onDeleteSchedule,
-}) => {
+export function CronScheduleTable({ schedules, onSchedulesChange }: CronScheduleTableProps) {
   const [newSchedule, setNewSchedule] = useState<Partial<CronSchedule>>({
     name: '',
     expression: '',
@@ -31,17 +24,29 @@ export const CronScheduleTable: React.FC<CronScheduleTableProps> = ({
       name: newSchedule.name,
       expression: newSchedule.expression,
       duration: newSchedule.duration || 30,
-      isActive: true,
+      isActive: newSchedule.isActive ?? true,
       color: generateColor(schedules.length),
     };
 
-    onAddSchedule(schedule);
+    onSchedulesChange([...schedules, schedule]);
     setNewSchedule({
       name: '',
       expression: '',
       duration: 30,
       isActive: true,
     });
+  };
+
+  const handleUpdateSchedule = (updatedSchedule: CronSchedule) => {
+    onSchedulesChange(
+      schedules.map((schedule) =>
+        schedule.id === updatedSchedule.id ? updatedSchedule : schedule
+      )
+    );
+  };
+
+  const handleDeleteSchedule = (scheduleId: string) => {
+    onSchedulesChange(schedules.filter((schedule) => schedule.id !== scheduleId));
   };
 
   return (
@@ -92,7 +97,7 @@ export const CronScheduleTable: React.FC<CronScheduleTableProps> = ({
                 type="checkbox"
                 checked={schedule.isActive}
                 onChange={(e) =>
-                  onUpdateSchedule({ ...schedule, isActive: e.target.checked })
+                  handleUpdateSchedule({ ...schedule, isActive: e.target.checked })
                 }
                 className="w-4 h-4"
               />
@@ -101,7 +106,7 @@ export const CronScheduleTable: React.FC<CronScheduleTableProps> = ({
               <span className="text-sm text-gray-600">{schedule.duration}min</span>
             </div>
             <button
-              onClick={() => onDeleteSchedule(schedule.id)}
+              onClick={() => handleDeleteSchedule(schedule.id)}
               className="p-1 text-red-500 hover:text-red-700"
             >
               Delete
@@ -111,4 +116,4 @@ export const CronScheduleTable: React.FC<CronScheduleTableProps> = ({
       </div>
     </div>
   );
-}; 
+} 

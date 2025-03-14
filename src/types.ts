@@ -40,6 +40,7 @@ export interface CronSchedule {
 
 export interface GridConfig {
   stepSize: number; // minutes between grid columns
+  timezone: string;
 }
 
 export interface Collision {
