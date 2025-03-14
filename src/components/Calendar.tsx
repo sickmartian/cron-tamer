@@ -15,16 +15,6 @@ export function Calendar({ schedules, config }: CalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const timeSlots = generateTimeSlots(schedules);
 
-  const getSlotStyle = (slot: TimeSlot) => {
-    if (slot.isSelfCollision) {
-      return 'bg-red-500 hover:bg-red-600';
-    }
-    if (slot.isCollision) {
-      return 'bg-yellow-500 hover:bg-yellow-600';
-    }
-    return 'bg-green-500 hover:bg-green-600';
-  };
-
   const getDaysInMonth = (date: Date) => {
     return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
   };
@@ -101,6 +91,7 @@ export function Calendar({ schedules, config }: CalendarProps) {
                         slot.start.getMonth() === currentDate.getMonth() &&
                         slot.start.getFullYear() === currentDate.getFullYear()
                     )}
+                    schedules={schedules}
                     stepSize={config.stepSize}
                     selectedSlot={selectedSlot}
                     onSlotSelect={setSelectedSlot}
