@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { CronSchedule, TimeSlot } from '../types';
 import { generateTimeSlots } from '../utils';
 import { DayGrid } from './DayGrid';
+import { DateTime } from 'luxon';
 
 interface CalendarProps {
   schedules: CronSchedule[];
@@ -58,13 +59,9 @@ export function Calendar({ schedules, selectedSlot, onSlotSelect, timezone }: Ca
         ))}
         {Array.from({ length: daysInMonth }, (_, i) => {
           // get the user's current day for the calendar month we are looking at
-          const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), i + 1);
-          const currentDay = date.toLocaleDateString('en-US');
+          const currentDay = DateTime.fromJSDate(currentDate).set({day: i + 1}).setZone(timezone);
           const daySlots = timeSlots.filter(slot => {
-            // Convert slot's start time to selected timezone
-            // and compare it to the user's current day for the calendar month we are looking at
-            const slotDay = slot.start.toLocaleDateString('en-US', { timeZone: timezone });
-            return slotDay === currentDay;
+            return Math.abs(slot.start.diff(currentDay, 'day').days) < 1;
           });
 
           return (
@@ -75,7 +72,6 @@ export function Calendar({ schedules, selectedSlot, onSlotSelect, timezone }: Ca
                 schedules={schedules}
                 selectedSlot={selectedSlot}
                 onSlotSelect={onSlotSelect}
-                timezone={timezone}
               />
             </div>
           );

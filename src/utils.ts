@@ -1,3 +1,4 @@
+import { DateTime } from 'luxon';
 import { CronSchedule, TimeSlot } from './types';
 import { parseExpression } from 'cron-parser';
 
@@ -22,24 +23,36 @@ export function parseCronExpression(
   expression: string,
   targetDate: Date = new Date(),
   timezone: string = 'UTC'
-): Date[] {
+): DateTime[] {
   try {
+    // This is a workaround to avoid the behavior in cron-parser
+    // that is not taking into account the current date 'edge' when cron expression is 0 0 1 * *
+    // and current date is the first day of the month
+    const almostCurrentDate = DateTime.local().set({
+      day: 1,
+      month: targetDate.getMonth() + 1,
+      year: targetDate.getFullYear(),
+      hour: 0,
+      minute: 0,
+      second: 0,
+      millisecond: 0
+    }).minus({millisecond: 1}).toFormat('yyyy-MM-dd\'T\'HH:mm:ss');
     const paddedMonth = targetDate.getMonth() + 1 < 10 ? `0${targetDate.getMonth() + 1}` : targetDate.getMonth() + 1;
     const endOfMonth = new Date(targetDate.getFullYear(), targetDate.getMonth() + 1, 0);
     const paddedEndOfMonthDay = endOfMonth.getDate() < 10 ? `0${endOfMonth.getDate()}` : endOfMonth.getDate();
     const options = {
-      currentDate: `${targetDate.getFullYear()}-${paddedMonth}-01T00:00:00`,
+      currentDate: almostCurrentDate, //`${targetDate.getFullYear()}-${paddedMonth}-01T00:00:00`,
       tz: timezone,
       endDate: `${endOfMonth.getFullYear()}-${paddedMonth}-${paddedEndOfMonthDay}T23:59:59`,
     };
     
     const interval = parseExpression(expression, options);
-    const occurrences: Date[] = [];
+    const occurrences: DateTime[] = [];
     
     try {
       let current = interval.next();
       while (true) {
-        occurrences.push(current.toDate());
+        occurrences.push(DateTime.fromISO(current.toISOString(), { zone: timezone }));
         current = interval.next();
       }
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -73,12 +86,13 @@ export function generateTimeSlots(
         duration: schedule.duration,
         scheduleId: schedule.id,
         scheduleName: schedule.name,
-        key: `${schedule.id}-${start.getTime()}`
+        key: `${schedule.id}-${start.toString()}`
       });
     });
   });
 
-  return timeSlots.sort((a, b) => a.start.getTime() - b.start.getTime());
+  // Sort by start time
+  return timeSlots.sort((a, b) => a.start.toMillis() - b.start.toMillis());
 }
 
 export function getTimeSlotKey(scheduleId: string, startTime: Date): string {

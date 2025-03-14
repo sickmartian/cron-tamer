@@ -1,3 +1,5 @@
+import { DateTime } from "luxon";
+
 export interface Schedule {
   id: string;
   name: string;
@@ -17,7 +19,7 @@ export interface TimeSlot {
   key: string;
   scheduleId: string;
   scheduleName: string;
-  start: Date;
+  start: DateTime;
   duration: number; // Duration in minutes
 }
 
