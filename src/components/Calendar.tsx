@@ -7,16 +7,17 @@ interface CalendarProps {
   schedules: CronSchedule[];
   selectedSlot: TimeSlot | null;
   onSlotSelect: (slot: TimeSlot) => void;
+  timezone: string;
 }
 
-export function Calendar({ schedules, selectedSlot, onSlotSelect }: CalendarProps) {
+export function Calendar({ schedules, selectedSlot, onSlotSelect, timezone }: CalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
 
   const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
   const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
   const monthName = currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
 
-  const timeSlots = generateTimeSlots(schedules, currentDate);
+  const timeSlots = generateTimeSlots(schedules, currentDate, timezone);
 
   const handlePrevMonth = () => {
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1));
@@ -56,12 +57,15 @@ export function Calendar({ schedules, selectedSlot, onSlotSelect }: CalendarProp
           <div key={`empty-${i}`} className="bg-white" />
         ))}
         {Array.from({ length: daysInMonth }, (_, i) => {
+          // get the user's current day for the calendar month we are looking at
           const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), i + 1);
-          const daySlots = timeSlots.filter(
-            slot => slot.start.getDate() === date.getDate() &&
-                   slot.start.getMonth() === date.getMonth() &&
-                   slot.start.getFullYear() === date.getFullYear()
-          );
+          const currentDay = date.toLocaleDateString('en-US');
+          const daySlots = timeSlots.filter(slot => {
+            // Convert slot's start time to selected timezone
+            // and compare it to the user's current day for the calendar month we are looking at
+            const slotDay = slot.start.toLocaleDateString('en-US', { timeZone: timezone });
+            return slotDay === currentDay;
+          });
 
           return (
             <div key={i} className="min-h-[200px] bg-white p-2">
@@ -71,6 +75,7 @@ export function Calendar({ schedules, selectedSlot, onSlotSelect }: CalendarProp
                 schedules={schedules}
                 selectedSlot={selectedSlot}
                 onSlotSelect={onSlotSelect}
+                timezone={timezone}
               />
             </div>
           );

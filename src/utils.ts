@@ -24,10 +24,13 @@ export function parseCronExpression(
   timezone: string = 'UTC'
 ): Date[] {
   try {
+    const paddedMonth = targetDate.getMonth() + 1 < 10 ? `0${targetDate.getMonth() + 1}` : targetDate.getMonth() + 1;
+    const endOfMonth = new Date(targetDate.getFullYear(), targetDate.getMonth() + 1, 0);
+    const paddedEndOfMonthDay = endOfMonth.getDate() < 10 ? `0${endOfMonth.getDate()}` : endOfMonth.getDate();
     const options = {
-      currentDate: targetDate,
+      currentDate: `${targetDate.getFullYear()}-${paddedMonth}-01T00:00:00`,
       tz: timezone,
-      endDate: new Date(targetDate.getFullYear(), targetDate.getMonth() + 1, 0, 23, 59, 59)
+      endDate: `${endOfMonth.getFullYear()}-${paddedMonth}-${paddedEndOfMonthDay}T23:59:59`,
     };
     
     const interval = parseExpression(expression, options);
@@ -35,7 +38,7 @@ export function parseCronExpression(
     
     try {
       let current = interval.next();
-      while (current.toDate() <= options.endDate) {
+      while (true) {
         occurrences.push(current.toDate());
         current = interval.next();
       }
