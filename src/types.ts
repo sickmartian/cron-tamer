@@ -14,14 +14,11 @@ export interface ScheduleFormProps {
 }
 
 export interface TimeSlot {
-  start: Date;
-  duration: number; // in minutes
+  key: string;
   scheduleId: string;
   scheduleName: string;
-  isCollision: boolean;
-  isSelfCollision: boolean;
-  key: string;
-  positions: number; // number of grid positions this slot should take
+  start: Date;
+  duration: number; // Duration in minutes
 }
 
 export interface CalendarProps {
@@ -42,11 +39,6 @@ export interface CronSchedule {
 export interface GridConfig {
   stepSize: number; // minutes between grid columns
   timezone: string;
-}
-
-export interface Collision {
-  schedules: CronSchedule[];
-  timeSlot: TimeSlot;
 }
 
 export interface DayGrid {
