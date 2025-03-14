@@ -97,7 +97,12 @@ export function Calendar({
             });
           }
           const daySlots = slots.filter((slot) => {
-            return slot.start.hasSame(currentDay, "day");
+            return (
+              slot.start.hasSame(currentDay, "day") ||
+              slot.start
+                .plus({ minutes: slot.duration })
+                .hasSame(currentDay, "day")
+            );
           });
 
           return (

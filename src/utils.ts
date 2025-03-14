@@ -20,9 +20,6 @@ export function parseCronExpression(
   targetDate: Date = new Date(),
   timezone: string = "UTC"
 ): DateTime[] {
-  // This is a workaround to avoid the behavior in cron-parser
-  // that is not taking into account the current date 'edge' when cron expression is 0 0 1 * *
-  // and current date is the first day of the month
   const almostCurrentDate = DateTime.local()
     .set({
       day: 1,
@@ -33,7 +30,14 @@ export function parseCronExpression(
       second: 0,
       millisecond: 0,
     })
-    .minus({ millisecond: 1 })
+    .minus({
+      // The millis here is a workaround to avoid the behavior in cron-parser
+      // that is not taking into account the current date 'edge' when cron expression is 0 0 1 * *
+      // and current date is the first day of the month
+      millisecond: 1,
+      // the month here is to allow for inter month jobs, we give more than we have to
+      month: 1,
+    })
     .toFormat("yyyy-MM-dd'T'HH:mm:ss");
   const paddedMonth =
     targetDate.getMonth() + 1 < 10
@@ -49,7 +53,7 @@ export function parseCronExpression(
       ? `0${endOfMonth.getDate()}`
       : endOfMonth.getDate();
   const options = {
-    currentDate: almostCurrentDate, //`${targetDate.getFullYear()}-${paddedMonth}-01T00:00:00`,
+    currentDate: almostCurrentDate,
     tz: timezone,
     endDate: `${endOfMonth.getFullYear()}-${paddedMonth}-${paddedEndOfMonthDay}T23:59:59`,
   };
