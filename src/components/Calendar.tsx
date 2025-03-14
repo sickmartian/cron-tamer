@@ -2,7 +2,7 @@ import { useState } from "react";
 import { CronSchedule, TimeSlot } from "../types";
 import { generateTimeSlots } from "../utils";
 import { DayGrid } from "./DayGrid";
-import { DateTime } from "luxon";
+import { DateTime, Interval } from "luxon";
 
 interface CalendarProps {
   schedules: CronSchedule[];
@@ -86,9 +86,9 @@ export function Calendar({
         ))}
         {Array.from({ length: daysInMonth }, (_, i) => {
           // get the user's current day for the calendar month we are looking at
-          const currentDay = DateTime.fromJSDate(currentDate)
-            .set({ day: i + 1 })
-            .setZone(timezone, { keepLocalTime: true });
+          const currentDayStart = DateTime.fromJSDate(currentDate)
+            .set({ day: i + 1, hour: 0, minute: 0, second: 0, millisecond: 0 })
+            .setZone(projectionTimezone, { keepLocalTime: true });
           let slots = timeSlots;
           if (projectionTimezone !== timezone) {
             slots = timeSlots.map((slot) => {
@@ -97,11 +97,14 @@ export function Calendar({
             });
           }
           const daySlots = slots.filter((slot) => {
-            return (
-              slot.start.hasSame(currentDay, "day") ||
-              slot.start
-                .plus({ minutes: slot.duration })
-                .hasSame(currentDay, "day")
+            return Interval.fromDateTimes(
+              currentDayStart,
+              currentDayStart.endOf("day")
+            ).intersection(
+              Interval.fromDateTimes(
+                slot.start,
+                slot.start.plus({ minutes: slot.duration })
+              )
             );
           });
 
@@ -115,6 +118,7 @@ export function Calendar({
               </div>
               <DayGrid
                 timeSlots={daySlots}
+                currentDayStart={currentDayStart}
                 schedules={schedules}
                 selectedSlot={selectedSlot}
                 onSlotSelect={onSlotSelect}

@@ -2,7 +2,7 @@
 
 ### Features
 
-- [~] Time Zone projection
+- [x] Time Zone projection
 - [ ] Memory
 - [ ] Sharing
 - [ ] Samples
@@ -11,8 +11,8 @@
 
 ### Issues
 
-- [ ] Inter month
-- [ ] Inter day
+- [x] Inter month
+- [x] Inter day
 - [x] `0 0,1,2 30 * *` in march
 - [x] test multi-row value
 - [x] Not alignment for 30 and 31 on March
@@ -25,3 +25,8 @@
 
 - [ ] Performance
 - [ ] Double call to cron parsing shouldn't happen
+- [ ] Branding
+  - [ ] Title
+  - [ ] Icons
+- [ ] Remove unused stuff, if any
+- [ ] Maybe add tests to some of the components logic, abstract it away, so we can check via snapshots, specially time zone and inter day or month logic

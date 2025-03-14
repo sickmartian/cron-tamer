@@ -1,8 +1,10 @@
 import { useMemo } from "react";
 import { TimeSlot, CronSchedule } from "../types";
+import { DateTime } from "luxon";
 
 interface DayGridProps {
   timeSlots: TimeSlot[];
+  currentDayStart: DateTime;
   schedules: CronSchedule[];
   selectedSlot: TimeSlot | null;
   onSlotSelect: (slot: TimeSlot) => void;
@@ -17,6 +19,7 @@ interface SlotBar {
 
 export function DayGrid({
   timeSlots,
+  currentDayStart,
   schedules,
   selectedSlot,
   onSlotSelect
@@ -32,13 +35,26 @@ export function DayGrid({
     const bars: SlotBar[] = [];
 
     timeSlots.forEach((slot) => {
+      const adjustedSlot = {
+        ...slot,
+      }
+
+      if (slot.start < currentDayStart) {
+        adjustedSlot.duration -= currentDayStart.diff(slot.start, 'minutes').minutes;
+        adjustedSlot.start = currentDayStart;
+      }
+      const endDateTime = adjustedSlot.start.plus({ minutes: adjustedSlot.duration });
+      if (!endDateTime.hasSame(currentDayStart, 'day')) {
+        adjustedSlot.duration = currentDayStart.endOf('day').diff(adjustedSlot.start, 'minutes').minutes;
+      }
+
       // Convert start time to selected timezone
-      const startSeconds = slot.start.minute * 60 + slot.start.second;
-      const durationSeconds = slot.duration * 60;
+      const startSeconds = adjustedSlot.start.minute * 60 + adjustedSlot.start.second;
+      const durationSeconds = adjustedSlot.duration * 60;
 
       // Calculate how many hours this slot spans
       let remainingDuration = durationSeconds;
-      let currentHour = slot.start.hour;
+      let currentHour = adjustedSlot.start.hour;
       let currentStartSeconds = startSeconds;
 
       while (remainingDuration > 0 && currentHour < 24) {
@@ -50,7 +66,7 @@ export function DayGrid({
         const barDuration = Math.min(remainingDuration, secondsInCurrentHour);
 
         bars.push({
-          slot,
+          slot, // original one
           row: currentHour,
           startSeconds: currentStartSeconds,
           durationSeconds: barDuration,
@@ -68,7 +84,7 @@ export function DayGrid({
       if (a.row !== b.row) return a.row - b.row;
       return a.startSeconds - b.startSeconds;
     });
-  }, [timeSlots]);
+  }, [timeSlots, currentDayStart]);
 
   return (
     <div className="grid grid-cols-1 gap-0.5 bg-gray-100 dark:bg-gray-700">
