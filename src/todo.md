@@ -2,15 +2,17 @@
 
 ### Features
 
-- [ ] Time Zone projection
+- [~] Time Zone projection
 - [ ] Memory
-- [ ] Samples
 - [ ] Sharing
+- [ ] Samples
 - [ ] Select single day as well, show labels for columns and rows
 - [ ] Collisions
 
 ### Issues
 
+- [ ] Inter month
+- [ ] Inter day
 - [x] `0 0,1,2 30 * *` in march
 - [x] test multi-row value
 - [x] Not alignment for 30 and 31 on March

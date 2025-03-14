@@ -48,9 +48,13 @@ export function CronScheduleTable({
       return;
     }
 
+    if (!newSchedule.name || newSchedule.name === "") {
+      newSchedule.name = newSchedule.expression;
+    }
+
     const schedule: CronSchedule = {
       id: crypto.randomUUID(),
-      name: newSchedule.name ?? newSchedule.expression,
+      name: newSchedule.name,
       expression: newSchedule.expression,
       duration: newSchedule.duration || 30,
       isActive: newSchedule.isActive ?? true,
