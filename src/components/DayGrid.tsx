@@ -71,13 +71,13 @@ export function DayGrid({
   }, [timeSlots]);
 
   return (
-    <div className="grid grid-cols-1 gap-0.5 bg-gray-100">
+    <div className="grid grid-cols-1 gap-0.5 bg-gray-100 dark:bg-gray-700">
       {Array.from({ length: 24 }, (_, hour) => {
         // Find any bars that should be rendered in this hour
         const bars = slotBars.filter((bar) => bar.row === hour);
 
         return (
-          <div key={hour} className="h-1 bg-white relative">
+          <div key={hour} className="h-1 bg-white dark:bg-gray-800 relative">
             {bars.map((bar) => {
               // Calculate position and width as percentages of the hour
               const startPercent = (bar.startSeconds / 3600) * 100;
@@ -88,7 +88,7 @@ export function DayGrid({
                   key={`${bar.slot.key}-${bar.row}`}
                   className={`absolute h-1 cursor-pointer ${
                     selectedSlot?.key === bar.slot.key
-                      ? "ring-2 ring-blue-500"
+                      ? "ring-2 ring-blue-500 dark:ring-blue-400"
                       : ""
                   }`}
                   style={{

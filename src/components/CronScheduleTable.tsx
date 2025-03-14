@@ -90,8 +90,8 @@ export function CronScheduleTable({
   };
 
   return (
-    <div className="p-4 bg-white rounded-lg shadow">
-      <h2 className="text-xl font-bold mb-4">Cron Schedules</h2>
+    <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
+      <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Cron Schedules</h2>
 
       <form onSubmit={handleSubmit} className="mb-4 space-y-2">
         <div className="grid grid-cols-2 gap-2">
@@ -104,12 +104,12 @@ export function CronScheduleTable({
                 setNewSchedule({ ...newSchedule, expression: e.target.value });
                 setError(null);
               }}
-              className={`p-2 border rounded w-full ${
+              className={`p-2 border rounded w-full dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
                 error ? "border-red-500" : ""
               }`}
             />
             {error && (
-              <div className="absolute top-full left-0 mt-1 text-sm text-red-500 bg-red-50 p-1 rounded">
+              <div className="absolute top-full left-0 mt-1 text-sm text-red-500 bg-red-50 dark:bg-red-900/50 p-1 rounded">
                 {error}
               </div>
             )}
@@ -124,7 +124,7 @@ export function CronScheduleTable({
                 duration: parseInt(e.target.value),
               })
             }
-            className="p-2 border rounded"
+            className="p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"
           />
           <input
             type="text"
@@ -133,7 +133,7 @@ export function CronScheduleTable({
             onChange={(e) =>
               setNewSchedule({ ...newSchedule, name: e.target.value })
             }
-            className="p-2 border rounded"
+            className="p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"
           />
           <button
             type="submit"
@@ -149,7 +149,7 @@ export function CronScheduleTable({
         {schedules.map((schedule) => (
           <div
             key={schedule.id}
-            className="flex items-center justify-between p-2 border rounded"
+            className="flex items-center justify-between p-2 border rounded dark:border-gray-700"
             style={{ backgroundColor: schedule.color + "20" }}
           >
             <div className="flex items-center space-x-4">
@@ -164,17 +164,17 @@ export function CronScheduleTable({
                 }
                 className="w-4 h-4"
               />
-              <span className="font-medium">{schedule.name}</span>
-              <span className="text-sm text-gray-600">
+              <span className="font-medium text-gray-900 dark:text-white">{schedule.name}</span>
+              <span className="text-sm text-gray-600 dark:text-gray-300">
                 {schedule.expression}
               </span>
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-gray-600 dark:text-gray-300">
                 {schedule.duration}min
               </span>
             </div>
             <button
               onClick={() => handleDeleteSchedule(schedule.id)}
-              className="p-1 text-red-500 hover:text-red-700"
+              className="p-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
             >
               Delete
             </button>

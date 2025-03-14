@@ -24,14 +24,14 @@ export default function App() {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Cron Schedule Comparison</h1>
+      <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Cron Schedule Comparison</h1>
       <div className="mb-4">
-        <label className="flex items-center space-x-2">
+        <label className="flex items-center space-x-2 text-gray-900 dark:text-white">
           <span>Timezone:</span>
           <select
             value={timezone}
             onChange={(e) => setTimezone(e.target.value)}
-            className="border rounded px-2 py-1"
+            className="border rounded px-2 py-1 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
           >
             {TIMEZONES.map((tz) => (
               <option key={tz} value={tz}>

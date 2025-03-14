@@ -2,10 +2,12 @@
 
 ### Features
 
-- Memory
-- Samples
-- Time Zone projection
-- Sharing
+- [ ] Time Zone projection
+- [ ] Memory
+- [ ] Samples
+- [ ] Sharing
+- [ ] Select single day as well, show labels for columns and rows
+- [ ] Collisions
 
 ### Issues
 
@@ -15,7 +17,7 @@
 - [x] Step size adjustments break things, dots go below each other with small number, it just falls apart => bars
 - [x] Cron schedule color doesn't match the grid's color, it selects the same one twice
 - [x] Bad parsing of cron doesn't show a nice error, just fails
-- [ ] Dark mode has non-visible text
+- [X] Dark mode has non-visible text
 
 ### NTH
 
