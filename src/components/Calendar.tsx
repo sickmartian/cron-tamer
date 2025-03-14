@@ -59,9 +59,9 @@ export function Calendar({ schedules, selectedSlot, onSlotSelect, timezone }: Ca
         ))}
         {Array.from({ length: daysInMonth }, (_, i) => {
           // get the user's current day for the calendar month we are looking at
-          const currentDay = DateTime.fromJSDate(currentDate).set({day: i + 1}).setZone(timezone);
+          const currentDay = DateTime.fromJSDate(currentDate).set({day: i + 1}).setZone(timezone, { keepLocalTime: true });
           const daySlots = timeSlots.filter(slot => {
-            return Math.abs(slot.start.diff(currentDay, 'day').days) < 1;
+            return slot.start.hasSame(currentDay, 'day');
           });
 
           return (
