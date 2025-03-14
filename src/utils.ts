@@ -20,63 +20,58 @@ export function parseCronExpression(
   targetDate: Date = new Date(),
   timezone: string = "UTC"
 ): DateTime[] {
+  // This is a workaround to avoid the behavior in cron-parser
+  // that is not taking into account the current date 'edge' when cron expression is 0 0 1 * *
+  // and current date is the first day of the month
+  const almostCurrentDate = DateTime.local()
+    .set({
+      day: 1,
+      month: targetDate.getMonth() + 1,
+      year: targetDate.getFullYear(),
+      hour: 0,
+      minute: 0,
+      second: 0,
+      millisecond: 0,
+    })
+    .minus({ millisecond: 1 })
+    .toFormat("yyyy-MM-dd'T'HH:mm:ss");
+  const paddedMonth =
+    targetDate.getMonth() + 1 < 10
+      ? `0${targetDate.getMonth() + 1}`
+      : targetDate.getMonth() + 1;
+  const endOfMonth = new Date(
+    targetDate.getFullYear(),
+    targetDate.getMonth() + 1,
+    0
+  );
+  const paddedEndOfMonthDay =
+    endOfMonth.getDate() < 10
+      ? `0${endOfMonth.getDate()}`
+      : endOfMonth.getDate();
+  const options = {
+    currentDate: almostCurrentDate, //`${targetDate.getFullYear()}-${paddedMonth}-01T00:00:00`,
+    tz: timezone,
+    endDate: `${endOfMonth.getFullYear()}-${paddedMonth}-${paddedEndOfMonthDay}T23:59:59`,
+  };
+
+  const interval = parseExpression(expression, options);
+  const occurrences: DateTime[] = [];
+
   try {
-    // This is a workaround to avoid the behavior in cron-parser
-    // that is not taking into account the current date 'edge' when cron expression is 0 0 1 * *
-    // and current date is the first day of the month
-    const almostCurrentDate = DateTime.local()
-      .set({
-        day: 1,
-        month: targetDate.getMonth() + 1,
-        year: targetDate.getFullYear(),
-        hour: 0,
-        minute: 0,
-        second: 0,
-        millisecond: 0,
-      })
-      .minus({ millisecond: 1 })
-      .toFormat("yyyy-MM-dd'T'HH:mm:ss");
-    const paddedMonth =
-      targetDate.getMonth() + 1 < 10
-        ? `0${targetDate.getMonth() + 1}`
-        : targetDate.getMonth() + 1;
-    const endOfMonth = new Date(
-      targetDate.getFullYear(),
-      targetDate.getMonth() + 1,
-      0
-    );
-    const paddedEndOfMonthDay =
-      endOfMonth.getDate() < 10
-        ? `0${endOfMonth.getDate()}`
-        : endOfMonth.getDate();
-    const options = {
-      currentDate: almostCurrentDate, //`${targetDate.getFullYear()}-${paddedMonth}-01T00:00:00`,
-      tz: timezone,
-      endDate: `${endOfMonth.getFullYear()}-${paddedMonth}-${paddedEndOfMonthDay}T23:59:59`,
-    };
-
-    const interval = parseExpression(expression, options);
-    const occurrences: DateTime[] = [];
-
-    try {
-      let current = interval.next();
-      while (true) {
-        occurrences.push(
-          DateTime.fromISO(current.toISOString(), { zone: timezone })
-        );
-        current = interval.next();
-      }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (err) {
-      // This is expected when we reach the end of the month
-      // The occurrences array will contain all valid dates up to that point
+    let current = interval.next();
+    while (true) {
+      occurrences.push(
+        DateTime.fromISO(current.toISOString(), { zone: timezone })
+      );
+      current = interval.next();
     }
-
-    return occurrences;
-  } catch (error) {
-    console.error("Error parsing cron expression:", error);
-    return [];
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (err) {
+    // This could be an expected when we reach the end of the period
+    // The occurrences array will contain all valid dates up to that point
   }
+
+  return occurrences;
 }
 
 export function generateTimeSlots(

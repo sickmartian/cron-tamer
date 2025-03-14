@@ -29,4 +29,7 @@ describe("parseCronExpression", () => {
       expect(occurrences).toMatchSnapshot();
     }
   );
+  it("should throw an error if the cron expression is invalid", () => {
+    expect(() => parseCronExpression("invalid", new Date("2025-03-14T04:00:00"), "UTC")).toThrow();
+  });
 });

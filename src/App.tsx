@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { CronSchedule, TimeSlot } from './types'
 import { CronScheduleTable } from './components/CronScheduleTable'
 import { Calendar } from './components/Calendar'
