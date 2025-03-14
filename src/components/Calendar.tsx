@@ -14,7 +14,7 @@ interface CalendarProps {
 
 export function Calendar({ schedules, config, selectedDate, onDateChange }: CalendarProps) {
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
-  const timeSlots = generateTimeSlots(schedules, selectedDate, config.timezone);
+  const timeSlots = generateTimeSlots(schedules, selectedDate, config.timezone, config.stepSize);
 
   const getDaysInMonth = (date: Date) => {
     return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();

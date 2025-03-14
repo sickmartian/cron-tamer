@@ -15,12 +15,13 @@ export interface ScheduleFormProps {
 
 export interface TimeSlot {
   start: Date;
-  end: Date;
+  duration: number; // in minutes
   scheduleId: string;
   scheduleName: string;
   isCollision: boolean;
   isSelfCollision: boolean;
   key: string;
+  positions: number; // number of grid positions this slot should take
 }
 
 export interface CalendarProps {

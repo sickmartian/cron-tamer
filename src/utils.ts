@@ -54,7 +54,8 @@ export function parseCronExpression(
 export function generateTimeSlots(
   schedules: CronSchedule[],
   targetDate: Date,
-  timezone: string = 'UTC'
+  timezone: string = 'UTC',
+  stepSize: number = 10
 ): TimeSlot[] {
   const timeSlots: TimeSlot[] = [];
 
@@ -64,34 +65,38 @@ export function generateTimeSlots(
     const occurrences = parseCronExpression(schedule.expression, targetDate, timezone);
     
     occurrences.forEach((start) => {
-      const end = new Date(start.getTime() + schedule.duration * 60000);
+      // Calculate how many grid positions this slot should take
+      const positions = Math.ceil(schedule.duration / stepSize);
       
       // Check for self-collisions
       const hasSelfCollision = timeSlots.some(
         (slot) =>
           slot.scheduleId === schedule.id &&
-          ((start >= slot.start && start < slot.end) ||
-            (end > slot.start && end <= slot.end) ||
-            (start <= slot.start && end >= slot.end))
+          ((start >= slot.start && start < new Date(slot.start.getTime() + slot.duration * 60000)) ||
+            (new Date(start.getTime() + schedule.duration * 60000) > slot.start && 
+             new Date(start.getTime() + schedule.duration * 60000) <= new Date(slot.start.getTime() + slot.duration * 60000)) ||
+            (start <= slot.start && new Date(start.getTime() + schedule.duration * 60000) >= new Date(slot.start.getTime() + slot.duration * 60000)))
       );
 
       // Check for collisions with other schedules
       const hasCollision = timeSlots.some(
         (slot) =>
           slot.scheduleId !== schedule.id &&
-          ((start >= slot.start && start < slot.end) ||
-            (end > slot.start && end <= slot.end) ||
-            (start <= slot.start && end >= slot.end))
+          ((start >= slot.start && start < new Date(slot.start.getTime() + slot.duration * 60000)) ||
+            (new Date(start.getTime() + schedule.duration * 60000) > slot.start && 
+             new Date(start.getTime() + schedule.duration * 60000) <= new Date(slot.start.getTime() + slot.duration * 60000)) ||
+            (start <= slot.start && new Date(start.getTime() + schedule.duration * 60000) >= new Date(slot.start.getTime() + slot.duration * 60000)))
       );
 
       timeSlots.push({
         start,
-        end,
+        duration: schedule.duration,
         scheduleId: schedule.id,
         scheduleName: schedule.name,
         isCollision: hasCollision,
         isSelfCollision: hasSelfCollision,
         key: `${schedule.id}-${start.getTime()}`,
+        positions
       });
     });
   });
