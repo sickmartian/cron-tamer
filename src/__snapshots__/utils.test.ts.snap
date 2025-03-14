@@ -1,0 +1,58 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`parseCronExpression should parse cron expressions correctly in Europe/Madrid / 0 1-5 30 3 * 1`] = `
+[
+  2025-03-30T00:00:00.000Z,
+  2025-03-30T01:00:00.000Z,
+  2025-03-30T02:00:00.000Z,
+  2025-03-30T03:00:00.000Z,
+]
+`;
+
+exports[`parseCronExpression should parse cron expressions correctly in Europe/Madrid / 0 2 30 3 * 1`] = `
+[
+  2025-03-30T01:00:00.000Z,
+]
+`;
+
+exports[`parseCronExpression should parse cron expressions correctly in Europe/Madrid / 30 2 30 3 * 1`] = `
+[
+  2025-03-30T01:30:00.000Z,
+]
+`;
+
+exports[`parseCronExpression should parse cron expressions correctly in Europe/Madrid / 30 3 30 3 * 1`] = `
+[
+  2025-03-30T01:30:00.000Z,
+]
+`;
+
+exports[`parseCronExpression should parse cron expressions correctly in Europe/Madrid / 30 3 30 3 * 2`] = `
+[
+  2025-03-30T01:30:00.000Z,
+]
+`;
+
+exports[`parseCronExpression should parse cron expressions correctly in UTC / 0 2 30 3 * 1`] = `
+[
+  2025-03-30T02:00:00.000Z,
+]
+`;
+
+exports[`parseCronExpression should parse cron expressions correctly in UTC / 0 3 30 3 * 1`] = `
+[
+  2025-03-30T03:00:00.000Z,
+]
+`;
+
+exports[`parseCronExpression should parse cron expressions correctly in UTC / 30 2 30 3 * 1`] = `
+[
+  2025-03-30T02:30:00.000Z,
+]
+`;
+
+exports[`parseCronExpression should parse cron expressions correctly in UTC / 30 3 30 3 * 1`] = `
+[
+  2025-03-30T03:30:00.000Z,
+]
+`;

@@ -10,7 +10,9 @@
     "test": "jest"
   },
   "dependencies": {
+    "@types/luxon": "^3.4.2",
     "cron-parser": "^4.9.0",
+    "luxon": "^3.5.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
