@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import { CronSchedule } from "../types";
 import { generateColor, parseCronExpression } from "../utils";
 
+const MAX_DURATION_MINUTES = 28 * 24 * 60; // 28 days in minutes
+const MIN_DURATION_MINUTES = 1;
+
 interface CronScheduleTableProps {
   schedules: CronSchedule[];
   onSchedulesChange: (schedules: CronSchedule[]) => void;
@@ -40,11 +43,29 @@ export function CronScheduleTable({
     }
   };
 
+  const validateDuration = (duration: number): boolean => {
+    if (duration < MIN_DURATION_MINUTES) {
+      setError(`Duration must be at least ${MIN_DURATION_MINUTES} minute`);
+      return false;
+    }
+    if (duration > MAX_DURATION_MINUTES) {
+      setError(
+        `Duration cannot exceed ${MAX_DURATION_MINUTES} minutes (28 days)`
+      );
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newSchedule.expression) return;
 
     if (!validateCronExpression(newSchedule.expression)) {
+      return;
+    }
+
+    if (!validateDuration(newSchedule.duration || 0)) {
       return;
     }
 
@@ -54,7 +75,7 @@ export function CronScheduleTable({
 
     const schedule: CronSchedule = {
       id: crypto.randomUUID(),
-      name: newSchedule.name,
+      name: newSchedule.name ?? newSchedule.expression,
       expression: newSchedule.expression,
       duration: newSchedule.duration || 30,
       isActive: newSchedule.isActive ?? true,
@@ -79,6 +100,10 @@ export function CronScheduleTable({
       return;
     }
 
+    if (!validateDuration(updatedSchedule.duration)) {
+      return;
+    }
+
     onSchedulesChange(
       schedules.map((schedule) =>
         schedule.id === updatedSchedule.id ? updatedSchedule : schedule
@@ -95,7 +120,9 @@ export function CronScheduleTable({
 
   return (
     <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
-      <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Cron Schedules</h2>
+      <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
+        Cron Schedules
+      </h2>
 
       <form onSubmit={handleSubmit} className="mb-4 space-y-2">
         <div className="grid grid-cols-2 gap-2">
@@ -118,18 +145,24 @@ export function CronScheduleTable({
               </div>
             )}
           </div>
-          <input
-            type="number"
-            placeholder="Duration (minutes)"
-            value={newSchedule.duration}
-            onChange={(e) =>
-              setNewSchedule({
-                ...newSchedule,
-                duration: parseInt(e.target.value),
-              })
-            }
-            className="p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-          />
+          <div className="relative">
+            <input
+              type="number"
+              placeholder="Duration (minutes)"
+              value={newSchedule.duration}
+              min={MIN_DURATION_MINUTES}
+              max={MAX_DURATION_MINUTES}
+              onChange={(e) => {
+                const value = parseInt(e.target.value);
+                setNewSchedule({
+                  ...newSchedule,
+                  duration: value,
+                });
+                setError(null);
+              }}
+              className="p-2 border rounded w-full dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            />
+          </div>
           <input
             type="text"
             placeholder="Schedule Name"
@@ -168,12 +201,38 @@ export function CronScheduleTable({
                 }
                 className="w-4 h-4"
               />
-              <span className="font-medium text-gray-900 dark:text-white">{schedule.name}</span>
+              <span className="font-medium text-gray-900 dark:text-white">
+                {schedule.name}
+              </span>
               <span className="text-sm text-gray-600 dark:text-gray-300">
                 {schedule.expression}
               </span>
+              <input
+                type="number"
+                value={schedule.duration}
+                min={MIN_DURATION_MINUTES}
+                max={MAX_DURATION_MINUTES}
+                onChange={(e) => {
+                  const value = e.target.value === '' ? MIN_DURATION_MINUTES : parseInt(e.target.value);
+                  if (isNaN(value)) return;
+                  handleUpdateSchedule({
+                    ...schedule,
+                    duration: value,
+                  });
+                }}
+                onBlur={(e) => {
+                  const value = e.target.value === '' ? MIN_DURATION_MINUTES : parseInt(e.target.value);
+                  if (isNaN(value)) {
+                    handleUpdateSchedule({
+                      ...schedule,
+                      duration: MIN_DURATION_MINUTES,
+                    });
+                  }
+                }}
+                className="w-20 p-1 border rounded text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              />
               <span className="text-sm text-gray-600 dark:text-gray-300">
-                {schedule.duration}min
+                min
               </span>
             </div>
             <button
