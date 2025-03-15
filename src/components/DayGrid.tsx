@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { TimeSlot, CronSchedule } from "../types";
 import { DateTime } from "luxon";
 
@@ -32,10 +32,27 @@ interface CollisionData {
   }>;
 }
 
+interface PopoverInfo {
+  barKey: string;
+  title: string;
+  position: {
+    x: number;
+    y: number;
+  };
+}
+
 // Safe ISO string function to avoid null
 const safeToISOString = (dateTime: DateTime): string => {
   const iso = dateTime.toISO();
   return iso ? iso : dateTime.toString();
+};
+
+// Format time from seconds
+const formatTimeFromSeconds = (seconds: number): string => {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 };
 
 export function DayGrid({
@@ -46,6 +63,38 @@ export function DayGrid({
   onSlotSelect,
   isDetailedView = false
 }: DayGridProps) {
+  const [popover, setPopover] = useState<PopoverInfo | null>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Close popover when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        popoverRef.current && 
+        !popoverRef.current.contains(event.target as Node) &&
+        event.target instanceof Element &&
+        !event.target.closest('[data-bar="true"]')
+      ) {
+        // Clear both the popover and the selected slot
+        setPopover(null);
+        onSlotSelect(null as any);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [onSlotSelect]);
+  
+  // Clear popover when selected slot changes externally
+  useEffect(() => {
+    if (!selectedSlot) {
+      setPopover(null);
+    }
+  }, [selectedSlot]);
+
   const getSlotStyle = (slot: TimeSlot, isCollision = false) => {
     if (isCollision) {
       return { backgroundColor: "#EF4444" }; // Red color for collisions
@@ -294,41 +343,70 @@ export function DayGrid({
   const getCollisionTitle = (bar: SlotBar) => {
     if (!bar.isCollision || !bar.collidingSlots) return "";
     
+    // Format all colliding schedules with their start times
     const schedulesInfo = bar.collidingSlots.map(s => {
       try {
         const date = new Date(s.startTime);
-        return `${s.scheduleName} (${date.toLocaleTimeString()})`;
+        return `${s.scheduleName} - ${date.toLocaleTimeString()}`;
       } catch (e) {
-        return s.scheduleName;
+        return `${s.scheduleName} - unknown time`;
       }
-    }).join(", ");
+    }).join("\n");
     
     // Format start and end times for the collision itself
-    let startTimeStr = "";
-    let endTimeStr = "";
-    
+    let collisionTimeRange = "";
     try {
-      // Extract hours/minutes/seconds from the seconds count
-      const startHour = Math.floor(bar.startSeconds / 3600);
-      const startMinutes = Math.floor((bar.startSeconds % 3600) / 60);
-      const startSeconds = bar.startSeconds % 60;
-      startTimeStr = `${startHour.toString().padStart(2, '0')}:${startMinutes.toString().padStart(2, '0')}:${startSeconds.toString().padStart(2, '0')}`;
-      
-      const endSeconds = bar.startSeconds + bar.durationSeconds;
-      const endHour = Math.floor(endSeconds / 3600);
-      const endMinutes = Math.floor((endSeconds % 3600) / 60);
-      const endSecs = endSeconds % 60;
-      endTimeStr = `${endHour.toString().padStart(2, '0')}:${endMinutes.toString().padStart(2, '0')}:${endSecs.toString().padStart(2, '0')}`;
+      const startTimeStr = formatTimeFromSeconds(bar.startSeconds);
+      const endTimeStr = formatTimeFromSeconds(bar.startSeconds + bar.durationSeconds);
+      collisionTimeRange = `${startTimeStr} - ${endTimeStr}`;
     } catch (e) {
-      startTimeStr = "unknown";
-      endTimeStr = "unknown";
+      collisionTimeRange = "unknown";
     }
     
-    return `COLLISION: ${schedulesInfo} (${startTimeStr} - ${endTimeStr})`;
+    // Put it all together in the requested format
+    return `Collision:\n${schedulesInfo}\nCollision Times: ${collisionTimeRange}`;
+  };
+  
+  // Get the title for a bar
+  const getBarTitle = (bar: SlotBar) => {
+    if (bar.isCollision) {
+      return getCollisionTitle(bar);
+    } else {
+      return `${bar.slot.scheduleName} - ${bar.slot.start.toLocaleString(DateTime.DATETIME_SHORT)} (${bar.slot.duration} minutes)`;
+    }
+  };
+  
+  // Handle click on a bar
+  const handleBarClick = (e: React.MouseEvent, bar: SlotBar, barKey: string) => {
+    e.stopPropagation();
+    
+    // Check if this is a toggle (clicking on already selected bar)
+    const isToggling = !bar.isCollision && selectedSlot?.key === bar.slot.key;
+    
+    if (isToggling) {
+      // Unselect the slot
+      onSlotSelect(null as any);
+      setPopover(null);
+    } else {
+      // Only select non-collision bars
+      if (!bar.isCollision) {
+        onSlotSelect(bar.slot);
+      }
+      
+      // Use mouse coordinates for popover positioning
+      setPopover({
+        barKey,
+        title: getBarTitle(bar),
+        position: {
+          x: e.clientX,
+          y: e.clientY
+        }
+      });
+    }
   };
 
   return (
-    <div className={containerClass}>
+    <div className={containerClass} ref={containerRef}>
       {Array.from({ length: 24 }, (_, hour) => {
         // Find any bars that should be rendered in this hour
         const bars = slotBars.filter((bar) => bar.row === hour);
@@ -340,14 +418,16 @@ export function DayGrid({
               // Calculate position and width as percentages of the hour
               const startPercent = (bar.startSeconds / 3600) * 100;
               const widthPercent = (bar.durationSeconds / 3600) * 100;
+              
+              const barKey = `${bar.slot.key}-${bar.row}-${bar.startSeconds}`;
+              const isSelected = selectedSlot?.key === bar.slot.key && !bar.isCollision;
 
               return (
                 <div
-                  key={`${bar.slot.key}-${bar.row}-${bar.startSeconds}`}
+                  key={barKey}
+                  data-bar="true"
                   className={`absolute ${barHeight} cursor-pointer ${
-                    selectedSlot?.key === bar.slot.key && !bar.isCollision
-                      ? "ring-2 ring-blue-500 dark:ring-blue-400"
-                      : ""
+                    isSelected ? "ring-2 ring-blue-500 dark:ring-blue-400" : ""
                   } ${isDetailedView ? "flex items-center justify-center" : ""} ${
                     bar.isCollision ? "border border-yellow-300 z-20" : ""
                   }`}
@@ -359,17 +439,8 @@ export function DayGrid({
                     transform: "translateY(-50%)",
                     zIndex: bar.isCollision ? 20 : 10
                   }}
-                  title={bar.isCollision ? getCollisionTitle(bar) : `${
-                    bar.slot.scheduleName
-                  } - ${bar.slot.start.toLocaleString(DateTime.DATETIME_SHORT)} (${
-                    bar.slot.duration
-                  } minutes)`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (!bar.isCollision) {
-                      onSlotSelect(bar.slot);
-                    }
-                  }}
+                  title={getBarTitle(bar)}
+                  onClick={(e) => handleBarClick(e, bar, barKey)}
                 >
                   {isDetailedView && widthPercent > 20 && !bar.isCollision && (
                     <span className="text-xs text-white font-medium truncate px-1">
@@ -387,6 +458,31 @@ export function DayGrid({
           </div>
         );
       })}
+      
+      {/* Popover positioned based on mouse coordinates */}
+      {popover && (
+        <div
+          ref={popoverRef}
+          className="fixed z-30 bg-gray-800 text-white text-sm rounded-md p-2 shadow-lg max-w-xs overflow-auto"
+          style={{
+            top: popover.position.y - 10, 
+            left: Math.max(0, popover.position.x - 100),
+            transform: 'translateY(-100%)',
+            maxHeight: '300px', // Add max height with scrolling
+            minWidth: '220px'
+          }}
+        >
+          <div className="whitespace-pre-wrap break-words">{popover.title}</div>
+          <div 
+            className="absolute w-3 h-3 bg-gray-800 rotate-45 transform"
+            style={{
+              bottom: '-6px',
+              left: '50%',
+              marginLeft: '-6px'
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 }

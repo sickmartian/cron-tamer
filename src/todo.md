@@ -9,16 +9,7 @@ http://localhost:5173/#eyJ0aW1lem9uZSI6IlVUQyIsInByb2plY3Rpb25UaW1lem9uZSI6IlVUQ
 - [x] Sharing
 - [ ] Samples
 - [x] Select single day as well, show labels for columns and rows => vertical not aligning
-
-- [ ] Collisions => title untested
-
-```text
-in daygrid, there might be the case that the bars overlap each other, these are called collisions, and we should mark them as such there.
-
-the identity of the collisioned thing is given by the schedule name and it's slot start date
-
-we should split a bar with a collision, since a collision can happen over different or even the same schedule (with different start dates), both cases should be accounted for, also a collision could happen on the 'start' of one schedule/start, the 'end' of the schedule/start, one schedule/start could contain the other or they could overlap perfectly, on all these cases the section that is overlaping should be shown as a new bar, in red, whose title contains all the schedule/starts that are part of the collision, and on which time the collision starts and where it ends, the non-colliding parts of the bars should be shown with their proper colors 
-```
+- [x] Collisions
 
 ### Issues
 
