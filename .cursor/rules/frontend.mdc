@@ -1,0 +1,8 @@
+---
+description: use when doing frontend changes
+globs: 
+alwaysApply: false
+---
+# Frontend Stack
+
+- We are using React with Vite, writting TypeScript, with Tailwind and PostCSS for styling.
