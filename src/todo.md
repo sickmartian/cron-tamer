@@ -3,8 +3,8 @@
 ### Features
 
 - [x] Time Zone projection
-- [ ] Memory
-- [ ] Sharing
+- [ ] ~~Memory~~ => Use sharing
+- [x] Sharing
 - [ ] Samples
 - [ ] Select single day as well, show labels for columns and rows
 - [ ] Collisions
