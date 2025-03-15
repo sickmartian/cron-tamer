@@ -29,7 +29,7 @@ export function DetailedDayView({
   projectionTimezone,
 }: DetailedDayViewProps) {
   // Filter time slots for the current day
-  const daySlots = useMemo(() => {
+  const { daySlots, projectedDay } = useMemo(() => {
     let slots = timeSlots;
     if (projectionTimezone !== timezone) {
       slots = timeSlots.map((slot) => {
@@ -39,20 +39,27 @@ export function DetailedDayView({
       });
     }
 
+    const projectedDay = currentDayStart
+      .set({ hour: 0, minute: 0, second: 0, millisecond: 0 })
+      .setZone(projectionTimezone, { keepLocalTime: true });
+
     const currentDayInterval = Interval.fromDateTimes(
-      currentDayStart,
-      currentDayStart.endOf("day")
+      projectedDay,
+      projectedDay.endOf("day")
     );
 
-    return slots.filter((slot) => {
-      const slotInterval = Interval.fromDateTimes(
-        slot.start,
-        slot.start.plus({ minutes: slot.duration })
-      );
+    return {
+      daySlots: slots.filter((slot) => {
+        const slotInterval = Interval.fromDateTimes(
+          slot.start,
+          slot.start.plus({ minutes: slot.duration })
+        );
 
-      // Check if there's an intersection between the day interval and the slot interval
-      return currentDayInterval.intersection(slotInterval);
-    });
+        // Check if there's an intersection between the day interval and the slot interval
+        return currentDayInterval.intersection(slotInterval);
+      }),
+      projectedDay: projectedDay,
+    };
   }, [timeSlots, currentDayStart, timezone, projectionTimezone]);
 
   // Format date for display
@@ -128,7 +135,7 @@ export function DetailedDayView({
           <div className="h-[600px]">
             <DayGrid
               timeSlots={daySlots}
-              currentDayStart={currentDayStart}
+              currentDayStart={projectedDay}
               schedules={schedules}
               selectedSlot={selectedSlot}
               onSlotSelect={onSlotSelect}
