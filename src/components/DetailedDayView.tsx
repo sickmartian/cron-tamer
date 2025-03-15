@@ -38,18 +38,18 @@ export function DetailedDayView({
         return newSlot;
       });
     }
-    
+
     const currentDayInterval = Interval.fromDateTimes(
       currentDayStart,
       currentDayStart.endOf("day")
     );
-    
+
     return slots.filter((slot) => {
       const slotInterval = Interval.fromDateTimes(
         slot.start,
         slot.start.plus({ minutes: slot.duration })
       );
-      
+
       // Check if there's an intersection between the day interval and the slot interval
       return currentDayInterval.intersection(slotInterval);
     });
@@ -57,12 +57,12 @@ export function DetailedDayView({
 
   // Format date for display
   const formattedDate = currentDayStart.toLocaleString({
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric'
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
   });
-  
+
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
       <div className="flex items-center justify-between p-4 border-b dark:border-gray-700">
@@ -94,30 +94,36 @@ export function DetailedDayView({
       <div className="flex">
         {/* Hour labels on the left */}
         <div className="w-12 bg-gray-100 dark:bg-gray-700">
+          <div
+            key="extra-space"
+            className="h-8 flex items-center justify-center text-xs border-b border-gray-200 dark:border-gray-700 font-medium text-gray-500 dark:text-gray-400"
+          ></div>
           {Array.from({ length: 24 }, (_, hour) => (
-            <div 
-              key={hour} 
-              className="h-10 flex items-center justify-center text-xs font-medium text-gray-500 dark:text-gray-400"
+            <div
+              key={hour}
+              className="h-10 flex items-center justify-center text-xs border-b border-gray-200 dark:border-gray-700 font-medium text-gray-500 dark:text-gray-400"
             >
-              {hour}
+              {hour}:00
             </div>
           ))}
         </div>
-        
+
         {/* Main content area with minute columns and DayGrid */}
         <div className="flex-1">
           {/* Minute range headers */}
           <div className="flex border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-            {['0-9', '10-19', '20-29', '30-39', '40-49', '50-59'].map((range) => (
-              <div 
-                key={range}
-                className="flex-1 px-1 py-2 text-xs text-center font-medium text-gray-500 dark:text-gray-400"
-              >
-                {range}
-              </div>
-            ))}
+            {["0-9", "10-19", "20-29", "30-39", "40-49", "50-59"].map(
+              (range) => (
+                <div
+                  key={range}
+                  className="flex-1 px-1 py-2 text-xs text-center font-medium text-gray-500 dark:text-gray-400"
+                >
+                  {range}
+                </div>
+              )
+            )}
           </div>
-          
+
           {/* DayGrid with expanded height for detailed view */}
           <div className="h-[600px]">
             <DayGrid
@@ -133,4 +139,4 @@ export function DetailedDayView({
       </div>
     </div>
   );
-} 
+}
