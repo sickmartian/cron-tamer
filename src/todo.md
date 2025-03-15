@@ -1,13 +1,24 @@
 ## ToDo
 
+http://localhost:5173/#eyJ0aW1lem9uZSI6IlVUQyIsInByb2plY3Rpb25UaW1lem9uZSI6IlVUQyIsInNjaGVkdWxlcyI6W3siaWQiOiI5MDIzOGQ4NS02MTVjLTQ2NjYtOTBjYy0wZDQzMjJhN2JhYTUiLCJuYW1lIjoiSW50ZXIgTW9udGgiLCJleHByZXNzaW9uIjoiMzAgMjMgMjggMiAqIiwiZHVyYXRpb24iOjYwLCJpc0FjdGl2ZSI6dHJ1ZSwiY29sb3IiOiIjRkZENzAwIn0seyJpZCI6ImQyNDU4Yjg1LTQ5YzYtNGE3Ni05MmY2LWM2OWQ1YWJkNjc2MSIsIm5hbWUiOiJJbnRlciBEYXkiLCJleHByZXNzaW9uIjoiMzAgMjMgMSAzICoiLCJkdXJhdGlvbiI6NjAsImlzQWN0aXZlIjp0cnVlLCJjb2xvciI6IiM0NjgyQjQifSx7ImlkIjoiMzc0NmYyYzgtYzk0Mi00OTE5LWI5MGYtNjkwZjM5MTlmMzM1IiwibmFtZSI6IjMgRGF5cyIsImV4cHJlc3Npb24iOiIwIDEyIDMgMyAqIiwiZHVyYXRpb24iOjI4ODAsImlzQWN0aXZlIjp0cnVlLCJjb2xvciI6IiM4QjQ1MTMifSx7ImlkIjoiYmMxYmRhZDktOTc1Ni00MTE1LWJkZjgtZGNiM2YxNWNhMTY3IiwibmFtZSI6IkV2ZXJ5IG1vbnRoLCAxLzEyIiwiZXhwcmVzc2lvbiI6IjAgMTIgMSAqICoiLCJkdXJhdGlvbiI6NjAsImlzQWN0aXZlIjp0cnVlLCJjb2xvciI6IiNDQ0NDRkYifSx7ImlkIjoiNWIyZjhhNDEtMDUwYS00ZTViLThmZmQtMWJhM2I3ZDc4Njg2IiwibmFtZSI6Ik92ZXJsYXAgQmFzZSIsImV4cHJlc3Npb24iOiIwIDQgMSAqICoiLCJkdXJhdGlvbiI6NjAsImlzQWN0aXZlIjp0cnVlLCJjb2xvciI6IiM5OEZCOTgifSx7ImlkIjoiMGI4Y2ZjYzktOWQ3My00YzViLWFhZWYtYjg0MWNlODU4Mjk1IiwibmFtZSI6Ik92ZXJsYXAgTGVmdCIsImV4cHJlc3Npb24iOiI1MCAzIDEgKiAqIiwiZHVyYXRpb24iOjIwLCJpc0FjdGl2ZSI6dHJ1ZSwiY29sb3IiOiIjMDBGRkZGIn0seyJpZCI6ImZhOTk1MjYzLTMzYjktNDM4Yi05YTQ1LTJmNTM2OGY0ZjdlMSIsIm5hbWUiOiJPdmVybGFwIFJpZ2h0IiwiZXhwcmVzc2lvbiI6IjUwIDQgMSAqICoiLCJkdXJhdGlvbiI6MjAsImlzQWN0aXZlIjp0cnVlLCJjb2xvciI6IiNGRkQ3MDAifSx7ImlkIjoiZWE3MWEzNTctMDBiMi00OWVmLThlNDAtN2Q2Y2ZhZmQwNjkzIiwibmFtZSI6Ik92ZXJsYXAgSW5zaWRlIiwiZXhwcmVzc2lvbiI6IjIwIDQgMSAqICoiLCJkdXJhdGlvbiI6MjAsImlzQWN0aXZlIjp0cnVlLCJjb2xvciI6IiM0NjgyQjQifSx7ImlkIjoiMTQ1ODE5MzEtNTFjZi00MzExLWIxYjUtNDFhMTA2NzUxMWQ4IiwibmFtZSI6IlBlcmZlY3QgT3ZlcmxhcCAxIiwiZXhwcmVzc2lvbiI6IjAgOCAxICogKiIsImR1cmF0aW9uIjo2MCwiaXNBY3RpdmUiOnRydWUsImNvbG9yIjoiIzhCNDUxMyJ9LHsiaWQiOiI1YTRkNmNhYS0wNTZkLTQ1NzUtODIyYi1iZjRkMGNkNzM1NTMiLCJuYW1lIjoiUGVyZmVjdCBPdmVybGFwIDIiLCJleHByZXNzaW9uIjoiMCA4IDEgKiAqIiwiZHVyYXRpb24iOjYwLCJpc0FjdGl2ZSI6dHJ1ZSwiY29sb3IiOiIjQ0NDQ0ZGIn0seyJpZCI6ImE5MGUzMmI2LWM2MmEtNDg3ZS05YmZhLTU2ODg0ZmNiYmVlNyIsIm5hbWUiOiJPdmVybGFwIFNlbGYiLCJleHByZXNzaW9uIjoiMCAzLTQgMiAqICoiLCJkdXJhdGlvbiI6OTAsImlzQWN0aXZlIjp0cnVlLCJjb2xvciI6IiM5OEZCOTgifV19
+
 ### Features
 
 - [x] Time Zone projection
 - [ ] ~~Memory~~ => Use sharing
 - [x] Sharing
 - [ ] Samples
-- [x] Select single day as well, show labels for columns and rows
-- [ ] Collisions
+- [x] Select single day as well, show labels for columns and rows => vertical not aligning
+
+- [ ] Collisions => title untested
+
+```text
+in daygrid, there might be the case that the bars overlap each other, these are called collisions, and we should mark them as such there.
+
+the identity of the collisioned thing is given by the schedule name and it's slot start date
+
+we should split a bar with a collision, since a collision can happen over different or even the same schedule (with different start dates), both cases should be accounted for, also a collision could happen on the 'start' of one schedule/start, the 'end' of the schedule/start, one schedule/start could contain the other or they could overlap perfectly, on all these cases the section that is overlaping should be shown as a new bar, in red, whose title contains all the schedule/starts that are part of the collision, and on which time the collision starts and where it ends, the non-colliding parts of the bars should be shown with their proper colors 
+```
 
 ### Issues
 
