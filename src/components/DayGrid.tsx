@@ -8,6 +8,7 @@ interface DayGridProps {
   schedules: CronSchedule[];
   selectedSlot: TimeSlot | null;
   onSlotSelect: (slot: TimeSlot) => void;
+  isDetailedView?: boolean;
 }
 
 interface SlotBar {
@@ -22,7 +23,8 @@ export function DayGrid({
   currentDayStart,
   schedules,
   selectedSlot,
-  onSlotSelect
+  onSlotSelect,
+  isDetailedView = false
 }: DayGridProps) {
   const getSlotStyle = (slot: TimeSlot) => {
     const schedule = schedules.find((s) => s.id === slot.scheduleId);
@@ -86,14 +88,37 @@ export function DayGrid({
     });
   }, [timeSlots, currentDayStart]);
 
+  const barHeight = isDetailedView ? "h-10" : "h-1";
+  const containerClass = isDetailedView 
+    ? "grid grid-cols-1 gap-0 h-full" 
+    : "grid grid-cols-1 gap-0.5 bg-gray-100 dark:bg-gray-700";
+
+  // Show minute range indicators only in detailed view
+  const renderMinuteMarkers = (hour: number) => {
+    if (!isDetailedView) return null;
+    
+    return (
+      <div className="absolute inset-0 flex pointer-events-none">
+        {['0-9', '10-19', '20-29', '30-39', '40-49', '50-59'].map((_, index) => (
+          <div 
+            key={`marker-${hour}-${index}`} 
+            className="flex-1 border-r border-gray-200 dark:border-gray-700 last:border-r-0"
+            style={{ left: `${(index / 6) * 100}%`, width: `${100/6}%` }}
+          />
+        ))}
+      </div>
+    );
+  };
+
   return (
-    <div className="grid grid-cols-1 gap-0.5 bg-gray-100 dark:bg-gray-700">
+    <div className={containerClass}>
       {Array.from({ length: 24 }, (_, hour) => {
         // Find any bars that should be rendered in this hour
         const bars = slotBars.filter((bar) => bar.row === hour);
 
         return (
-          <div key={hour} className="h-1 bg-white dark:bg-gray-800 relative">
+          <div key={hour} className={`${barHeight} bg-white dark:bg-gray-800 relative`}>
+            {renderMinuteMarkers(hour)}
             {bars.map((bar) => {
               // Calculate position and width as percentages of the hour
               const startPercent = (bar.startSeconds / 3600) * 100;
@@ -102,25 +127,35 @@ export function DayGrid({
               return (
                 <div
                   key={`${bar.slot.key}-${bar.row}`}
-                  className={`absolute h-1 cursor-pointer ${
+                  className={`absolute ${barHeight} cursor-pointer ${
                     selectedSlot?.key === bar.slot.key
                       ? "ring-2 ring-blue-500 dark:ring-blue-400"
                       : ""
-                  }`}
+                  } ${isDetailedView ? "flex items-center justify-center" : ""}`}
                   style={{
                     ...getSlotStyle(bar.slot),
                     width: `${widthPercent}%`,
                     left: `${startPercent}%`,
                     top: "50%",
                     transform: "translateY(-50%)",
+                    zIndex: 10
                   }}
                   title={`${
                     bar.slot.scheduleName
-                  } - ${bar.slot.start.toString()} (${
+                  } - ${bar.slot.start.toLocaleString(DateTime.DATETIME_SHORT)} (${
                     bar.slot.duration
                   } minutes)`}
-                  onClick={() => onSlotSelect(bar.slot)}
-                />
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSlotSelect(bar.slot);
+                  }}
+                >
+                  {isDetailedView && widthPercent > 20 && (
+                    <span className="text-xs text-white font-medium truncate px-1">
+                      {bar.slot.scheduleName}
+                    </span>
+                  )}
+                </div>
               );
             })}
           </div>

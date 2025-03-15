@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { CronSchedule, TimeSlot } from "./types";
 import { CronScheduleTable } from "./components/CronScheduleTable";
-import { Calendar } from "./components/Calendar";
+import { CalendarManager } from "./components/CalendarManager";
 import "./App.css";
 
 const TIMEZONES = [
@@ -205,7 +205,7 @@ export default function App() {
           />
         </div>
         <div>
-          <Calendar
+          <CalendarManager
             schedules={schedules}
             selectedSlot={selectedSlot}
             onSlotSelect={setSelectedSlot}

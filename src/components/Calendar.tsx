@@ -10,6 +10,10 @@ interface CalendarProps {
   onSlotSelect: (slot: TimeSlot) => void;
   timezone: string;
   projectionTimezone: string;
+  onDaySelect: (day: DateTime) => void;
+  currentDate: Date;
+  setCurrentDate: (date: Date) => void;
+  timeSlots: TimeSlot[];
 }
 
 export function Calendar({
@@ -18,9 +22,11 @@ export function Calendar({
   onSlotSelect,
   timezone,
   projectionTimezone,
+  onDaySelect,
+  currentDate,
+  setCurrentDate,
+  timeSlots,
 }: CalendarProps) {
-  const [currentDate, setCurrentDate] = useState(new Date());
-
   const daysInMonth = new Date(
     currentDate.getFullYear(),
     currentDate.getMonth() + 1,
@@ -35,8 +41,6 @@ export function Calendar({
     month: "long",
     year: "numeric",
   });
-
-  const timeSlots = generateTimeSlots(schedules, currentDate, timezone);
 
   const handlePrevMonth = () => {
     setCurrentDate(
@@ -92,8 +96,9 @@ export function Calendar({
           let slots = timeSlots;
           if (projectionTimezone !== timezone) {
             slots = timeSlots.map((slot) => {
-              slot.start = slot.start.setZone(projectionTimezone);
-              return slot;
+              const newSlot = { ...slot };
+              newSlot.start = slot.start.setZone(projectionTimezone);
+              return newSlot;
             });
           }
           const daySlots = slots.filter((slot) => {
@@ -111,7 +116,8 @@ export function Calendar({
           return (
             <div
               key={i}
-              className="min-h-[200px] bg-white dark:bg-gray-800 p-2"
+              className="min-h-[200px] bg-white dark:bg-gray-800 p-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+              onClick={() => onDaySelect(currentDayStart)}
             >
               <div className="text-sm font-medium mb-2 text-gray-900 dark:text-white">
                 {i + 1}
