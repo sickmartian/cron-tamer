@@ -39,16 +39,19 @@ export function DetailedDayView({
       });
     }
     
+    const currentDayInterval = Interval.fromDateTimes(
+      currentDayStart,
+      currentDayStart.endOf("day")
+    );
+    
     return slots.filter((slot) => {
-      return Interval.fromDateTimes(
-        currentDayStart,
-        currentDayStart.endOf("day")
-      ).intersection(
-        Interval.fromDateTimes(
-          slot.start,
-          slot.start.plus({ minutes: slot.duration })
-        )
+      const slotInterval = Interval.fromDateTimes(
+        slot.start,
+        slot.start.plus({ minutes: slot.duration })
       );
+      
+      // Check if there's an intersection between the day interval and the slot interval
+      return currentDayInterval.intersection(slotInterval);
     });
   }, [timeSlots, currentDayStart, timezone, projectionTimezone]);
 

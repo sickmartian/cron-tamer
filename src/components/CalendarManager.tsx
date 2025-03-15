@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { CronSchedule, TimeSlot } from "../types";
 import { Calendar } from "./Calendar";
 import { DetailedDayView } from "./DetailedDayView";
@@ -23,8 +23,36 @@ export function CalendarManager({
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState<DateTime | null>(null);
   
-  // Generate the time slots - will be used by both Calendar and DetailedDayView
-  const timeSlots = generateTimeSlots(schedules, currentDate, timezone);
+  // Track the currently displayed month to detect changes
+  const [displayedMonth, setDisplayedMonth] = useState({
+    year: currentDate.getFullYear(),
+    month: currentDate.getMonth()
+  });
+  
+  // Generate the time slots whenever the schedules, timezone, or displayed month changes
+  const timeSlots = useMemo(() => {
+    return generateTimeSlots(schedules, currentDate, timezone);
+  }, [schedules, timezone, displayedMonth, currentDate]);
+  
+  // Update displayed month when currentDate changes
+  useEffect(() => {
+    setDisplayedMonth({
+      year: currentDate.getFullYear(),
+      month: currentDate.getMonth()
+    });
+  }, [currentDate]);
+  
+  // Handle setting a new currentDate, ensuring it updates when changing months
+  const handleSetCurrentDate = (date: Date) => {
+    // Check if the month has changed
+    if (date.getMonth() !== currentDate.getMonth() || 
+        date.getFullYear() !== currentDate.getFullYear()) {
+      // Update the current date which will trigger the displayedMonth update
+      setCurrentDate(date);
+    } else {
+      setCurrentDate(date);
+    }
+  };
   
   const handleDaySelect = (date: DateTime) => {
     setSelectedDay(date);
@@ -36,13 +64,25 @@ export function CalendarManager({
   
   const handlePrevDay = () => {
     if (selectedDay) {
-      setSelectedDay(selectedDay.minus({ days: 1 }));
+      const newDay = selectedDay.minus({ days: 1 });
+      setSelectedDay(newDay);
+      
+      // Check if we crossed into a different month
+      if (newDay.month !== selectedDay.month || newDay.year !== selectedDay.year) {
+        handleSetCurrentDate(newDay.toJSDate());
+      }
     }
   };
   
   const handleNextDay = () => {
     if (selectedDay) {
-      setSelectedDay(selectedDay.plus({ days: 1 }));
+      const newDay = selectedDay.plus({ days: 1 });
+      setSelectedDay(newDay);
+      
+      // Check if we crossed into a different month
+      if (newDay.month !== selectedDay.month || newDay.year !== selectedDay.year) {
+        handleSetCurrentDate(newDay.toJSDate());
+      }
     }
   };
   
@@ -70,7 +110,7 @@ export function CalendarManager({
           projectionTimezone={projectionTimezone}
           onDaySelect={handleDaySelect}
           currentDate={currentDate}
-          setCurrentDate={setCurrentDate}
+          setCurrentDate={handleSetCurrentDate}
           timeSlots={timeSlots}
         />
       )}

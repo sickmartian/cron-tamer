@@ -43,15 +43,13 @@ export function Calendar({
   });
 
   const handlePrevMonth = () => {
-    setCurrentDate(
-      new Date(currentDate.getFullYear(), currentDate.getMonth() - 1)
-    );
+    const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1);
+    setCurrentDate(newDate);
   };
 
   const handleNextMonth = () => {
-    setCurrentDate(
-      new Date(currentDate.getFullYear(), currentDate.getMonth() + 1)
-    );
+    const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1);
+    setCurrentDate(newDate);
   };
 
   return (
@@ -93,6 +91,14 @@ export function Calendar({
           const currentDayStart = DateTime.fromJSDate(currentDate)
             .set({ day: i + 1, hour: 0, minute: 0, second: 0, millisecond: 0 })
             .setZone(projectionTimezone, { keepLocalTime: true });
+          
+          // Create a day interval for filtering
+          const dayInterval = Interval.fromDateTimes(
+            currentDayStart,
+            currentDayStart.endOf("day")
+          );
+          
+          // Convert time slots to the right timezone if needed
           let slots = timeSlots;
           if (projectionTimezone !== timezone) {
             slots = timeSlots.map((slot) => {
@@ -101,16 +107,14 @@ export function Calendar({
               return newSlot;
             });
           }
+          
+          // Filter slots that intersect with this day
           const daySlots = slots.filter((slot) => {
-            return Interval.fromDateTimes(
-              currentDayStart,
-              currentDayStart.endOf("day")
-            ).intersection(
-              Interval.fromDateTimes(
-                slot.start,
-                slot.start.plus({ minutes: slot.duration })
-              )
+            const slotInterval = Interval.fromDateTimes(
+              slot.start,
+              slot.start.plus({ minutes: slot.duration })
             );
+            return dayInterval.intersection(slotInterval);
           });
 
           return (

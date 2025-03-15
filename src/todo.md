@@ -6,7 +6,7 @@
 - [ ] ~~Memory~~ => Use sharing
 - [x] Sharing
 - [ ] Samples
-- [ ] Select single day as well, show labels for columns and rows
+- [x] Select single day as well, show labels for columns and rows
 - [ ] Collisions
 
 ### Issues
