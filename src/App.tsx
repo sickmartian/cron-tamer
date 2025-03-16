@@ -178,6 +178,18 @@ This tool helps you understand how your cron schedules interact with each other 
 It's particularly useful in case different jobs are sharing resources and need to be coordinated.
   `;
 
+  // Add escape key handler
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && showAbout) {
+        setShowAbout(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [showAbout]);
+
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-4">

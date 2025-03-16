@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import { CronSchedule, TimeSlot } from "../types";
 import { DateTime, Interval } from "luxon";
 import { DayGrid } from "./DayGrid";
@@ -29,6 +29,18 @@ export function DetailedDayView({
   timezone,
   projectionTimezone,
 }: DetailedDayViewProps) {
+  // Add escape key handler
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onBackToCalendar();
+      }
+    };
+
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [onBackToCalendar]);
+
   // Filter time slots for the current day
   const { daySlots, projectedDay } = useMemo(() => {
     let slots = timeSlots;
