@@ -7,7 +7,7 @@ http://localhost:5173/#eyJ0aW1lem9uZSI6IlVUQyIsInByb2plY3Rpb25UaW1lem9uZSI6IlVUQ
 - [x] Time Zone projection
 - [ ] ~~Memory~~ => Use sharing
 - [x] Sharing
-- [ ] Samples
+- [x] Samples
 - [x] Select single day as well, show labels for columns and rows => vertical not aligning
 - [x] Collisions
 
@@ -28,8 +28,8 @@ http://localhost:5173/#eyJ0aW1lem9uZSI6IlVUQyIsInByb2plY3Rpb25UaW1lem9uZSI6IlVUQ
 
 - [ ] Performance
 - [ ] Double call to cron parsing shouldn't happen
-- [ ] Branding
-  - [ ] Title
-  - [ ] Icons
+- [x] Branding
+  - [x] Title
+  - [x] Icons
 - [ ] Remove unused stuff, if any
 - [ ] Maybe add tests to some of the components logic, abstract it away, so we can check via snapshots, specially time zone and inter day or month logic

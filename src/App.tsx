@@ -5,6 +5,7 @@ import { CalendarManager } from "./components/CalendarManager";
 import Select from 'react-select';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import ReactMarkdown from 'react-markdown';
+import { v4 as uuidv4 } from 'uuid';
 import "./App.css";
 
 const TIMEZONES = [
@@ -20,6 +21,33 @@ const TIMEZONES = [
   "Asia/Shanghai",
   "Australia/Sydney",
 ].map(tz => ({ value: tz, label: tz }));
+
+const DEMO_SCHEDULES: CronSchedule[] = [
+  {
+    id: uuidv4(),
+    name: "Daily Backup",
+    expression: "0 1 * * *",
+    duration: 60,
+    isActive: true,
+    color: "#4682B4" // Steel Blue
+  },
+  {
+    id: uuidv4(),
+    name: "Data Processing",
+    expression: "30 1 * * *",
+    duration: 45,
+    isActive: true,
+    color: "#98FB98" // Pale Green
+  },
+  {
+    id: uuidv4(),
+    name: "Long Running Task",
+    expression: "0 2 * * *",
+    duration: 180,
+    isActive: true,
+    color: "#FFD700" // Gold
+  }
+];
 
 // Serialize state to base64 for URL hash
 const serializeState = (state: {
@@ -85,10 +113,12 @@ export default function App() {
   const [shareTooltip, setShareTooltip] = useState("");
   const [showAbout, setShowAbout] = useState(false);
 
-  // Load state from URL hash on initial render
+  // Load state from URL hash or initialize with demo data
   useEffect(() => {
     try {
       const hash = window.location.hash;
+      const hasVisitedBefore = localStorage.getItem('hasVisitedBefore');
+      
       if (hash) {
         const state = deserializeState(hash);
         if (state) {
@@ -104,6 +134,10 @@ export default function App() {
             setSchedules(state.schedules);
           }
         }
+      } else if (!hasVisitedBefore) {
+        // First time user, set demo schedules
+        setSchedules(DEMO_SCHEDULES);
+        localStorage.setItem('hasVisitedBefore', 'true');
       }
     } catch (e) {
       console.error("Error loading state from URL:", e);
