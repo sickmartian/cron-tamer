@@ -11,6 +11,11 @@ interface CronScheduleTableProps {
   onSchedulesChange: (schedules: CronSchedule[]) => void;
 }
 
+type ErrorState = {
+  message: string;
+  field: 'new-expression' | 'new-duration' | string; // string for schedule IDs
+}
+
 export function CronScheduleTable({
   schedules,
   onSchedulesChange,
@@ -21,7 +26,7 @@ export function CronScheduleTable({
     durationInput: "30",
     isActive: true,
   });
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<ErrorState | null>(null);
   const [debouncedUpdates, setDebouncedUpdates] = useState<{[key: string]: NodeJS.Timeout}>({});
   const [durationInputs, setDurationInputs] = useState<{[key: string]: string}>({});
 
@@ -46,22 +51,25 @@ export function CronScheduleTable({
     try {
       parseCronExpression(expression);
       return true;
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
-      setError("Invalid cron expression");
+      setError({ message: "Invalid cron expression", field: 'new-expression' });
       return false;
     }
   };
 
-  const validateDuration = (duration: number): boolean => {
+  const validateDuration = (duration: number, field: ErrorState['field']): boolean => {
     if (duration < MIN_DURATION_MINUTES) {
-      setError(`Duration must be at least ${MIN_DURATION_MINUTES} minute`);
+      setError({ 
+        message: `Duration must be at least ${MIN_DURATION_MINUTES} minute`,
+        field
+      });
       return false;
     }
     if (duration > MAX_DURATION_MINUTES) {
-      setError(
-        `Duration cannot exceed ${MAX_DURATION_MINUTES} minutes (28 days)`
-      );
+      setError({
+        message: `Duration cannot exceed ${MAX_DURATION_MINUTES} minutes (28 days)`,
+        field
+      });
       return false;
     }
     return true;
@@ -76,7 +84,7 @@ export function CronScheduleTable({
     }
 
     const duration = parseInt(newSchedule.durationInput || "30");
-    if (!validateDuration(duration)) {
+    if (!validateDuration(duration, 'new-duration')) {
       return;
     }
 
@@ -111,7 +119,7 @@ export function CronScheduleTable({
       return;
     }
 
-    if (!validateDuration(updatedSchedule.duration)) {
+    if (!validateDuration(updatedSchedule.duration, updatedSchedule.id)) {
       return;
     }
 
@@ -138,7 +146,7 @@ export function CronScheduleTable({
     // Set new timer
     const timer = setTimeout(() => {
       const duration = parseInt(inputValue);
-      if (!validateDuration(duration)) {
+      if (!validateDuration(duration, schedule.id)) {
         // Revert to last valid value
         setDurationInputs(prev => ({
           ...prev,
@@ -200,14 +208,9 @@ export function CronScheduleTable({
                 setError(null);
               }}
               className={`p-2 border rounded w-full dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
-                error ? "border-red-500" : ""
+                error?.field === 'new-expression' ? "border-red-500" : ""
               }`}
             />
-            {error && (
-              <div className="absolute top-full left-0 mt-1 text-sm text-red-500 bg-red-50 dark:bg-red-900/50 p-1 rounded">
-                {error}
-              </div>
-            )}
           </div>
           <div className="relative">
             <input
@@ -224,7 +227,9 @@ export function CronScheduleTable({
                 });
                 setError(null);
               }}
-              className="p-2 border rounded w-full dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              className={`p-2 border rounded w-full dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
+                error?.field === 'new-duration' ? "border-red-500" : ""
+              }`}
             />
           </div>
           <input
@@ -245,6 +250,12 @@ export function CronScheduleTable({
           </button>
         </div>
       </form>
+
+      {error && (
+        <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/50 border border-red-200 dark:border-red-800 rounded text-red-600 dark:text-red-400">
+          {error.message}
+        </div>
+      )}
 
       <div className="space-y-2">
         {schedules.map((schedule) => (
@@ -284,7 +295,9 @@ export function CronScheduleTable({
                   }));
                   handleDebouncedUpdate(schedule, value);
                 }}
-                className="w-20 p-1 border rounded text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                className={`w-20 p-1 border rounded text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
+                  error?.field === schedule.id ? "border-red-500" : ""
+                }`}
               />
               <span className="text-sm text-gray-600 dark:text-gray-300">
                 min
