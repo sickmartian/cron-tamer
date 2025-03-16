@@ -84,7 +84,7 @@ export function Calendar({
           </div>
         ))}
         {Array.from({ length: firstDayOfMonth }, (_, i) => (
-          <div key={`empty-${i}`} className="bg-white dark:bg-gray-800" />
+          <div key={`empty-${i}`}  />
         ))}
         {Array.from({ length: daysInMonth }, (_, i) => {
           // get the user's current day for the calendar month we are looking at

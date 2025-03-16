@@ -151,7 +151,7 @@ export default function App() {
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-          Cron Schedule Comparison
+          Cron Tamer
         </h1>
         <div className="relative">
           <button 
