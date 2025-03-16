@@ -2,6 +2,9 @@ import { useState, useEffect, useCallback } from "react";
 import { CronSchedule, TimeSlot } from "./types";
 import { CronScheduleTable } from "./components/CronScheduleTable";
 import { CalendarManager } from "./components/CalendarManager";
+import Select from 'react-select';
+import { XMarkIcon } from '@heroicons/react/24/outline';
+import ReactMarkdown from 'react-markdown';
 import "./App.css";
 
 const TIMEZONES = [
@@ -16,7 +19,7 @@ const TIMEZONES = [
   "Asia/Tokyo",
   "Asia/Shanghai",
   "Australia/Sydney",
-];
+].map(tz => ({ value: tz, label: tz }));
 
 // Serialize state to base64 for URL hash
 const serializeState = (state: {
@@ -80,6 +83,7 @@ export default function App() {
   );
   const [hasLoadedFromURL, setHasLoadedFromURL] = useState(false);
   const [shareTooltip, setShareTooltip] = useState("");
+  const [showAbout, setShowAbout] = useState(false);
 
   // Load state from URL hash on initial render
   useEffect(() => {
@@ -88,11 +92,11 @@ export default function App() {
       if (hash) {
         const state = deserializeState(hash);
         if (state) {
-          if (state.timezone && TIMEZONES.includes(state.timezone)) {
+          if (state.timezone && TIMEZONES.some(tz => tz.value === state.timezone)) {
             setTimezone(state.timezone);
           }
           
-          if (state.projectionTimezone && TIMEZONES.includes(state.projectionTimezone)) {
+          if (state.projectionTimezone && TIMEZONES.some(tz => tz.value === state.projectionTimezone)) {
             setProjectionTimezone(state.projectionTimezone);
           }
           
@@ -147,12 +151,47 @@ export default function App() {
       });
   };
 
+  const aboutContent = `
+# Cron Tamer
+
+A tool to visualize and compare cron schedules across different timezones.
+
+## Features
+
+- Visual representation of cron schedules
+- Timezone comparison and projection
+- Collision detection
+- Shareable configurations
+- Detailed day view
+
+## How to Use
+
+1. Add cron schedules using the table on the left
+2. View the schedules in the calendar view
+3. Click on any day for a detailed view
+4. Change timezones to see how schedules align
+5. Share your configuration using the Share button
+
+## About
+
+This tool helps you understand how your cron schedules interact with each other and how they behave across different timezones.
+It's particularly useful in case different jobs are sharing resources and need to be coordinated.
+  `;
+
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-          Cron Tamer
-        </h1>
+        <div className="flex items-center gap-4">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Cron Tamer
+          </h1>
+          <button
+            onClick={() => setShowAbout(true)}
+            className="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+          >
+            About
+          </button>
+        </div>
         <div className="relative">
           <button 
             onClick={handleShare}
@@ -167,53 +206,66 @@ export default function App() {
           )}
         </div>
       </div>
-      <div className="mb-4 flex gap-4">
-        <label className="flex items-center space-x-2 text-gray-900 dark:text-white">
-          <span>Runner Timezone:</span>
-          <select
-            value={timezone}
-            onChange={(e) => setTimezone(e.target.value)}
-            className="border rounded px-2 py-1 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-          >
-            {TIMEZONES.map((tz) => (
-              <option key={tz} value={tz}>
-                {tz}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex items-center space-x-2 text-gray-900 dark:text-white">
-          <span>Project To Timezone:</span>
-          <select
-            value={projectionTimezone}
-            onChange={(e) => setProjectionTimezone(e.target.value)}
-            className="border rounded px-2 py-1 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-          >
-            {TIMEZONES.map((tz) => (
-              <option key={tz} value={tz}>
-                {tz}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div>
-          <CronScheduleTable
-            schedules={schedules}
-            onSchedulesChange={setSchedules}
-          />
+
+      {showAbout ? (
+        <div className="fixed inset-0 bg-white dark:bg-gray-800 z-50 overflow-auto">
+          <div className="max-w-3xl mx-auto py-8 px-4">
+            <div className="flex justify-end mb-4">
+              <button
+                onClick={() => setShowAbout(false)}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
+              >
+                <XMarkIcon className="h-6 w-6 text-gray-500 dark:text-gray-400" />
+              </button>
+            </div>
+            <div className="prose dark:prose-invert max-w-none">
+              <ReactMarkdown>{aboutContent}</ReactMarkdown>
+            </div>
+          </div>
         </div>
-        <div>
-          <CalendarManager
-            schedules={schedules}
-            selectedSlot={selectedSlot}
-            onSlotSelect={setSelectedSlot}
-            timezone={timezone}
-            projectionTimezone={projectionTimezone}
-          />
-        </div>
-      </div>
+      ) : (
+        <>
+          <div className="mb-4 flex gap-4 flex-wrap">
+            <label className="flex items-center space-x-2 text-gray-900 dark:text-white min-w-[300px]">
+              <span>Runner Timezone:</span>
+              <Select
+                options={TIMEZONES}
+                value={TIMEZONES.find(tz => tz.value === timezone)}
+                onChange={(option) => option && setTimezone(option.value)}
+                className="flex-1 min-w-[200px]"
+                classNamePrefix="react-select"
+              />
+            </label>
+            <label className="flex items-center space-x-2 text-gray-900 dark:text-white min-w-[300px]">
+              <span>Project To Timezone:</span>
+              <Select
+                options={TIMEZONES}
+                value={TIMEZONES.find(tz => tz.value === projectionTimezone)}
+                onChange={(option) => option && setProjectionTimezone(option.value)}
+                className="flex-1 min-w-[200px]"
+                classNamePrefix="react-select"
+              />
+            </label>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div>
+              <CronScheduleTable
+                schedules={schedules}
+                onSchedulesChange={setSchedules}
+              />
+            </div>
+            <div>
+              <CalendarManager
+                schedules={schedules}
+                selectedSlot={selectedSlot}
+                onSlotSelect={setSelectedSlot}
+                timezone={timezone}
+                projectionTimezone={projectionTimezone}
+              />
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

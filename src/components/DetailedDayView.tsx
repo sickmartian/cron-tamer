@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { CronSchedule, TimeSlot } from "../types";
 import { DateTime, Interval } from "luxon";
 import { DayGrid } from "./DayGrid";
+import { ChevronLeftIcon, ChevronRightIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 
 interface DetailedDayViewProps {
   timeSlots: TimeSlot[];
@@ -79,21 +80,24 @@ export function DetailedDayView({
         <div className="flex gap-2">
           <button
             onClick={onPrevDay}
-            className="px-3 py-1 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600"
+            className="p-2 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600"
+            aria-label="Previous day"
           >
-            Previous Day
+            <ChevronLeftIcon className="h-5 w-5" />
           </button>
           <button
             onClick={onNextDay}
-            className="px-3 py-1 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600"
+            className="p-2 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600"
+            aria-label="Next day"
           >
-            Next Day
+            <ChevronRightIcon className="h-5 w-5" />
           </button>
           <button
             onClick={onBackToCalendar}
-            className="px-3 py-1 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600"
+            className="p-2 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600"
+            aria-label="Back to calendar"
           >
-            Back to Calendar
+            <ArrowLeftIcon className="h-5 w-5" />
           </button>
         </div>
       </div>

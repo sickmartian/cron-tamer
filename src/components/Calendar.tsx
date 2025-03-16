@@ -1,8 +1,7 @@
-import { useState } from "react";
 import { CronSchedule, TimeSlot } from "../types";
-import { generateTimeSlots } from "../utils";
 import { DayGrid } from "./DayGrid";
 import { DateTime, Interval } from "luxon";
+import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 
 interface CalendarProps {
   schedules: CronSchedule[];
@@ -61,15 +60,17 @@ export function Calendar({
         <div className="flex gap-2">
           <button
             onClick={handlePrevMonth}
-            className="px-3 py-1 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600"
+            className="p-2 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600"
+            aria-label="Previous month"
           >
-            Previous
+            <ChevronLeftIcon className="h-5 w-5" />
           </button>
           <button
             onClick={handleNextMonth}
-            className="px-3 py-1 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600"
+            className="p-2 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600"
+            aria-label="Next month"
           >
-            Next
+            <ChevronRightIcon className="h-5 w-5" />
           </button>
         </div>
       </div>
