@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { CronSchedule } from "../types";
 import { generateColor, parseCronExpression } from "../utils";
 
 const MAX_DURATION_MINUTES = 28 * 24 * 60; // 28 days in minutes
 const MIN_DURATION_MINUTES = 1;
+const DURATION_DEBOUNCE_MS = 500; // 500ms debounce for duration changes
 
 interface CronScheduleTableProps {
   schedules: CronSchedule[];
@@ -14,13 +15,15 @@ export function CronScheduleTable({
   schedules,
   onSchedulesChange,
 }: CronScheduleTableProps) {
-  const [newSchedule, setNewSchedule] = useState<Partial<CronSchedule>>({
+  const [newSchedule, setNewSchedule] = useState<Partial<CronSchedule> & { durationInput?: string }>({
     name: "",
     expression: "",
-    duration: 30,
+    durationInput: "30",
     isActive: true,
   });
   const [error, setError] = useState<string | null>(null);
+  const [debouncedUpdates, setDebouncedUpdates] = useState<{[key: string]: NodeJS.Timeout}>({});
+  const [durationInputs, setDurationInputs] = useState<{[key: string]: string}>({});
 
   // Auto-clear error after 3 seconds
   useEffect(() => {
@@ -31,6 +34,13 @@ export function CronScheduleTable({
       return () => clearTimeout(timer);
     }
   }, [error]);
+
+  // Cleanup debounce timers on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(debouncedUpdates).forEach(timer => clearTimeout(timer));
+    };
+  }, [debouncedUpdates]);
 
   const validateCronExpression = (expression: string): boolean => {
     try {
@@ -65,7 +75,8 @@ export function CronScheduleTable({
       return;
     }
 
-    if (!validateDuration(newSchedule.duration || 0)) {
+    const duration = parseInt(newSchedule.durationInput || "30");
+    if (!validateDuration(duration)) {
       return;
     }
 
@@ -77,7 +88,7 @@ export function CronScheduleTable({
       id: crypto.randomUUID(),
       name: newSchedule.name ?? newSchedule.expression,
       expression: newSchedule.expression,
-      duration: newSchedule.duration || 30,
+      duration: duration,
       isActive: newSchedule.isActive ?? true,
       color: generateColor(schedules.length),
     };
@@ -86,7 +97,7 @@ export function CronScheduleTable({
     setNewSchedule({
       name: "",
       expression: "",
-      duration: 30,
+      durationInput: "30",
       isActive: true,
     });
     setError(null);
@@ -118,6 +129,59 @@ export function CronScheduleTable({
     );
   };
 
+  const handleDebouncedUpdate = useCallback((schedule: CronSchedule, inputValue: string) => {
+    // Clear any existing timer for this schedule
+    if (debouncedUpdates[schedule.id]) {
+      clearTimeout(debouncedUpdates[schedule.id]);
+    }
+
+    // Set new timer
+    const timer = setTimeout(() => {
+      const duration = parseInt(inputValue);
+      if (!validateDuration(duration)) {
+        // Revert to last valid value
+        setDurationInputs(prev => ({
+          ...prev,
+          [schedule.id]: schedule.duration.toString()
+        }));
+        return;
+      }
+
+      onSchedulesChange(
+        schedules.map((s) =>
+          s.id === schedule.id ? { ...schedule, duration } : s
+        )
+      );
+      setError(null);
+      
+      // Clear the timer reference
+      setDebouncedUpdates(prev => {
+        const newUpdates = { ...prev };
+        delete newUpdates[schedule.id];
+        return newUpdates;
+      });
+    }, DURATION_DEBOUNCE_MS);
+
+    // Store the timer
+    setDebouncedUpdates(prev => ({
+      ...prev,
+      [schedule.id]: timer
+    }));
+  }, [schedules, onSchedulesChange, debouncedUpdates]);
+
+  // Initialize duration inputs
+  useEffect(() => {
+    const inputs: {[key: string]: string} = {};
+    schedules.forEach(schedule => {
+      if (!durationInputs[schedule.id]) {
+        inputs[schedule.id] = schedule.duration.toString();
+      }
+    });
+    if (Object.keys(inputs).length > 0) {
+      setDurationInputs(prev => ({ ...prev, ...inputs }));
+    }
+  }, [schedules]);
+
   return (
     <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
       <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
@@ -147,16 +211,16 @@ export function CronScheduleTable({
           </div>
           <div className="relative">
             <input
-              type="number"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
               placeholder="Duration (minutes)"
-              value={newSchedule.duration}
-              min={MIN_DURATION_MINUTES}
-              max={MAX_DURATION_MINUTES}
+              value={newSchedule.durationInput}
               onChange={(e) => {
-                const value = parseInt(e.target.value);
+                const value = e.target.value.replace(/\D/g, '');
                 setNewSchedule({
                   ...newSchedule,
-                  duration: value,
+                  durationInput: value,
                 });
                 setError(null);
               }}
@@ -208,26 +272,17 @@ export function CronScheduleTable({
                 {schedule.expression}
               </span>
               <input
-                type="number"
-                value={schedule.duration}
-                min={MIN_DURATION_MINUTES}
-                max={MAX_DURATION_MINUTES}
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={durationInputs[schedule.id] || schedule.duration}
                 onChange={(e) => {
-                  const value = e.target.value === '' ? MIN_DURATION_MINUTES : parseInt(e.target.value);
-                  if (isNaN(value)) return;
-                  handleUpdateSchedule({
-                    ...schedule,
-                    duration: value,
-                  });
-                }}
-                onBlur={(e) => {
-                  const value = e.target.value === '' ? MIN_DURATION_MINUTES : parseInt(e.target.value);
-                  if (isNaN(value)) {
-                    handleUpdateSchedule({
-                      ...schedule,
-                      duration: MIN_DURATION_MINUTES,
-                    });
-                  }
+                  const value = e.target.value.replace(/\D/g, '');
+                  setDurationInputs(prev => ({
+                    ...prev,
+                    [schedule.id]: value
+                  }));
+                  handleDebouncedUpdate(schedule, value);
                 }}
                 className="w-20 p-1 border rounded text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               />
