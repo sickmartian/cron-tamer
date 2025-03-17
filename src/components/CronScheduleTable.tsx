@@ -4,7 +4,6 @@ import {
   generateColor,
   parseCronExpression,
   releaseColor,
-  COLORS,
 } from "../utils";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 
@@ -21,11 +20,6 @@ type ErrorState = {
   message: string;
   field: "new-expression" | "new-duration" | string; // string for schedule IDs
 };
-
-interface ColorPickerPopup {
-  scheduleId: string;
-  position: { x: number; y: number };
-}
 
 export function CronScheduleTable({
   schedules,

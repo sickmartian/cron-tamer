@@ -32,6 +32,9 @@ http://localhost:5173/#eyJ0aW1lem9uZSI6IlVUQyIsInByb2plY3Rpb25UaW1lem9uZSI6IlVUQ
 - [x] More TZs
 - [x] More colors
 - [x] Color selection after creation
+- [ ] Current time should show up in the calendar
+- [ ] Currently running jobs should be somehow highlighted
+- [ ] Current day should be shown differntly in the Calendar
 - [ ] Back button should be a calendar icon instead
 - [ ] Small jobs should show a smaller text, not skip it
 - [ ] When long text and long cron exp, we want long text to win
