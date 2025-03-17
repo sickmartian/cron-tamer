@@ -8,19 +8,67 @@ import ReactMarkdown from 'react-markdown';
 import { v4 as uuidv4 } from 'uuid';
 import "./App.css";
 
-const TIMEZONES = [
-  "UTC",
-  "America/New_York",
-  "America/Chicago",
-  "America/Denver",
-  "America/Los_Angeles",
-  "Europe/London",
-  "Europe/Paris",
-  "Europe/Madrid",
-  "Asia/Tokyo",
-  "Asia/Shanghai",
-  "Australia/Sydney",
-].map(tz => ({ value: tz, label: tz }));
+interface TimezoneOption {
+  value: string;
+  label: string;
+}
+
+// Get all supported IANA timezones from the browser
+const TIMEZONES: TimezoneOption[] = (Intl as any).supportedValuesOf?.('timeZone')?.map((tz: string) => ({ 
+  value: tz, 
+  label: tz 
+})) ?? [
+  // Fallback list for browsers that don't support Intl.supportedValuesOf
+  { value: "UTC", label: "UTC" },
+  { value: "America/New_York", label: "America/New_York" },
+  { value: "America/Chicago", label: "America/Chicago" },
+  { value: "America/Denver", label: "America/Denver" },
+  { value: "America/Los_Angeles", label: "America/Los_Angeles" },
+  { value: "Europe/London", label: "Europe/London" },
+  { value: "Europe/Paris", label: "Europe/Paris" },
+  { value: "Europe/Madrid", label: "Europe/Madrid" },
+  { value: "Asia/Tokyo", label: "Asia/Tokyo" },
+  { value: "Asia/Shanghai", label: "Asia/Shanghai" },
+  { value: "Australia/Sydney", label: "Australia/Sydney" },
+];
+
+// Custom styles for react-select to handle dark mode and alignment
+const selectStyles = {
+  control: (base: any, state: any) => ({
+    ...base,
+    backgroundColor: 'var(--select-bg)',
+    borderColor: 'var(--select-border)',
+    '&:hover': {
+      borderColor: 'var(--select-border-hover)'
+    }
+  }),
+  menu: (base: any) => ({
+    ...base,
+    backgroundColor: 'var(--select-bg)',
+    color: 'var(--select-text)'
+  }),
+  option: (base: any, state: any) => ({
+    ...base,
+    backgroundColor: state.isFocused 
+      ? 'var(--select-option-hover-bg)' 
+      : 'var(--select-bg)',
+    color: 'var(--select-text)',
+    textAlign: 'left',
+    cursor: 'pointer',
+    '&:hover': {
+      backgroundColor: 'var(--select-option-hover-bg)'
+    }
+  }),
+  singleValue: (base: any) => ({
+    ...base,
+    color: 'var(--select-text)',
+    textAlign: 'left'
+  }),
+  input: (base: any) => ({
+    ...base,
+    color: 'var(--select-text)'
+  })
+};
 
 const DEMO_SCHEDULES: CronSchedule[] = [
   {
@@ -225,7 +273,7 @@ It's particularly useful in case different jobs are sharing resources and need t
   }, [showAbout]);
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto p-4 min-h-screen bg-white dark:bg-gray-900">
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-4">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -276,9 +324,10 @@ It's particularly useful in case different jobs are sharing resources and need t
               <span>Runner Timezone:</span>
               <Select
                 options={TIMEZONES}
-                value={TIMEZONES.find(tz => tz.value === timezone)}
+                value={TIMEZONES.find((tz: TimezoneOption) => tz.value === timezone)}
                 onChange={(option) => option && setTimezone(option.value)}
                 className="flex-1 min-w-[200px]"
+                styles={selectStyles}
                 classNamePrefix="react-select"
               />
             </label>
@@ -286,9 +335,10 @@ It's particularly useful in case different jobs are sharing resources and need t
               <span>Project To Timezone:</span>
               <Select
                 options={TIMEZONES}
-                value={TIMEZONES.find(tz => tz.value === projectionTimezone)}
+                value={TIMEZONES.find((tz: TimezoneOption) => tz.value === projectionTimezone)}
                 onChange={(option) => option && setProjectionTimezone(option.value)}
                 className="flex-1 min-w-[200px]"
+                styles={selectStyles}
                 classNamePrefix="react-select"
               />
             </label>

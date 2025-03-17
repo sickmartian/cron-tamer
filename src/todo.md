@@ -13,6 +13,9 @@ http://localhost:5173/#eyJ0aW1lem9uZSI6IlVUQyIsInByb2plY3Rpb25UaW1lem9uZSI6IlVUQ
 
 ### Issues
 
+- [ ] TZ Select unreadable in dark mode
+- [ ] TZ Options centered instead of left aligned
+- [ ] Adding 1, removing 1, adding 1, results in the same color
 - [x] Inter month
 - [x] Inter day
 - [x] `0 0,1,2 30 * *` in march
@@ -26,6 +29,9 @@ http://localhost:5173/#eyJ0aW1lem9uZSI6IlVUQyIsInByb2plY3Rpb25UaW1lem9uZSI6IlVUQ
 
 ### NTH
 
+- [ ] More TZs
+- [ ] More colors
+- [ ] Color selection after creation
 - [ ] Performance
 - [ ] Double call to cron parsing shouldn't happen
 - [x] Branding

@@ -40,3 +40,19 @@
 .read-the-docs {
   color: #888;
 }
+
+:root {
+  --select-bg: #ffffff;
+  --select-text: #1f2937;
+  --select-border: #e5e7eb;
+  --select-border-hover: #d1d5db;
+  --select-option-hover-bg: #f3f4f6;
+}
+
+.dark {
+  --select-bg: #1f2937;
+  --select-text: #f3f4f6;
+  --select-border: #374151;
+  --select-border-hover: #4b5563;
+  --select-option-hover-bg: #374151;
+}
