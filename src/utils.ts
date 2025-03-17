@@ -2,17 +2,56 @@ import { DateTime } from "luxon";
 import { CronSchedule, TimeSlot } from "./types";
 import { parseExpression } from "cron-parser";
 
-const COLORS = [
-  "#FFD700",
-  "#4682B4",
-  "#8B4513",
-  "#CCCCFF",
-  "#98FB98",
-  "#00FFFF",
+// Colors from Reasonable Colors that work well in both light and dark modes
+// Each color has good contrast against white and black backgrounds
+export const COLORS = [
+  "#0089fc", // blue
+  "#00a21f", // green
+  "#b98300", // amber
+  "#9b70ff", // violet
+  "#00999a", // cyan
+  "#d57300", // cinnamon
+  "#657eff", // indigo
+  "#00a05a", // emerald
+  "#ff4647", // red
+  "#fd4d00", // orange
+  "#ff426c", // raspberry
+  "#d150ff", // purple
 ];
 
+// Keep track of used colors to avoid duplicates
+let usedColors = new Set<string>();
+
 export function generateColor(index: number): string {
-  return COLORS[index % COLORS.length];
+  // Reset used colors if we've used them all
+  if (usedColors.size === COLORS.length) {
+    usedColors.clear();
+  }
+
+  // Find the first unused color
+  let color = COLORS[index % COLORS.length];
+  let attempts = 0;
+  while (usedColors.has(color) && attempts < COLORS.length) {
+    index = (index + 1) % COLORS.length;
+    color = COLORS[index];
+    attempts++;
+  }
+
+  // If we somehow can't find an unused color, generate a random one
+  if (usedColors.has(color)) {
+    const hue = Math.floor(Math.random() * 360);
+    const saturation = 65 + Math.floor(Math.random() * 10); // 65-75%
+    const lightness = 45 + Math.floor(Math.random() * 10); // 45-55%
+    color = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+  }
+
+  usedColors.add(color);
+  return color;
+}
+
+// Function to remove a color from used colors when a schedule is deleted
+export function releaseColor(color: string) {
+  usedColors.delete(color);
 }
 
 export function parseCronExpression(

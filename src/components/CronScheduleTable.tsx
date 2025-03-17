@@ -1,6 +1,12 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { CronSchedule } from "../types";
-import { generateColor, parseCronExpression } from "../utils";
+import {
+  generateColor,
+  parseCronExpression,
+  releaseColor,
+  COLORS,
+} from "../utils";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 
 const MAX_DURATION_MINUTES = 28 * 24 * 60; // 28 days in minutes
 const MIN_DURATION_MINUTES = 1;
@@ -13,22 +19,33 @@ interface CronScheduleTableProps {
 
 type ErrorState = {
   message: string;
-  field: 'new-expression' | 'new-duration' | string; // string for schedule IDs
+  field: "new-expression" | "new-duration" | string; // string for schedule IDs
+};
+
+interface ColorPickerPopup {
+  scheduleId: string;
+  position: { x: number; y: number };
 }
 
 export function CronScheduleTable({
   schedules,
   onSchedulesChange,
 }: CronScheduleTableProps) {
-  const [newSchedule, setNewSchedule] = useState<Partial<CronSchedule> & { durationInput?: string }>({
+  const [newSchedule, setNewSchedule] = useState<
+    Partial<CronSchedule> & { durationInput?: string }
+  >({
     name: "",
     expression: "",
     durationInput: "30",
     isActive: true,
   });
   const [error, setError] = useState<ErrorState | null>(null);
-  const [debouncedUpdates, setDebouncedUpdates] = useState<{[key: string]: NodeJS.Timeout}>({});
-  const [durationInputs, setDurationInputs] = useState<{[key: string]: string}>({});
+  const [debouncedUpdates, setDebouncedUpdates] = useState<{
+    [key: string]: NodeJS.Timeout;
+  }>({});
+  const [durationInputs, setDurationInputs] = useState<{
+    [key: string]: string;
+  }>({});
 
   // Auto-clear error after 3 seconds
   useEffect(() => {
@@ -43,7 +60,7 @@ export function CronScheduleTable({
   // Cleanup debounce timers on unmount
   useEffect(() => {
     return () => {
-      Object.values(debouncedUpdates).forEach(timer => clearTimeout(timer));
+      Object.values(debouncedUpdates).forEach((timer) => clearTimeout(timer));
     };
   }, [debouncedUpdates]);
 
@@ -52,23 +69,26 @@ export function CronScheduleTable({
       parseCronExpression(expression);
       return true;
     } catch (err) {
-      setError({ message: "Invalid cron expression", field: 'new-expression' });
+      setError({ message: "Invalid cron expression", field: "new-expression" });
       return false;
     }
   };
 
-  const validateDuration = (duration: number, field: ErrorState['field']): boolean => {
+  const validateDuration = (
+    duration: number,
+    field: ErrorState["field"]
+  ): boolean => {
     if (duration < MIN_DURATION_MINUTES) {
-      setError({ 
+      setError({
         message: `Duration must be at least ${MIN_DURATION_MINUTES} minute`,
-        field
+        field,
       });
       return false;
     }
     if (duration > MAX_DURATION_MINUTES) {
       setError({
         message: `Duration cannot exceed ${MAX_DURATION_MINUTES} minutes (28 days)`,
-        field
+        field,
       });
       return false;
     }
@@ -84,7 +104,7 @@ export function CronScheduleTable({
     }
 
     const duration = parseInt(newSchedule.durationInput || "30");
-    if (!validateDuration(duration, 'new-duration')) {
+    if (!validateDuration(duration, "new-duration")) {
       return;
     }
 
@@ -132,61 +152,68 @@ export function CronScheduleTable({
   };
 
   const handleDeleteSchedule = (scheduleId: string) => {
+    const schedule = schedules.find((s) => s.id === scheduleId);
+    if (schedule) {
+      releaseColor(schedule.color);
+    }
     onSchedulesChange(
       schedules.filter((schedule) => schedule.id !== scheduleId)
     );
   };
 
-  const handleDebouncedUpdate = useCallback((schedule: CronSchedule, inputValue: string) => {
-    // Clear any existing timer for this schedule
-    if (debouncedUpdates[schedule.id]) {
-      clearTimeout(debouncedUpdates[schedule.id]);
-    }
-
-    // Set new timer
-    const timer = setTimeout(() => {
-      const duration = parseInt(inputValue);
-      if (!validateDuration(duration, schedule.id)) {
-        // Revert to last valid value
-        setDurationInputs(prev => ({
-          ...prev,
-          [schedule.id]: schedule.duration.toString()
-        }));
-        return;
+  const handleDebouncedUpdate = useCallback(
+    (schedule: CronSchedule, inputValue: string) => {
+      // Clear any existing timer for this schedule
+      if (debouncedUpdates[schedule.id]) {
+        clearTimeout(debouncedUpdates[schedule.id]);
       }
 
-      onSchedulesChange(
-        schedules.map((s) =>
-          s.id === schedule.id ? { ...schedule, duration } : s
-        )
-      );
-      setError(null);
-      
-      // Clear the timer reference
-      setDebouncedUpdates(prev => {
-        const newUpdates = { ...prev };
-        delete newUpdates[schedule.id];
-        return newUpdates;
-      });
-    }, DURATION_DEBOUNCE_MS);
+      // Set new timer
+      const timer = setTimeout(() => {
+        const duration = parseInt(inputValue);
+        if (!validateDuration(duration, schedule.id)) {
+          // Revert to last valid value
+          setDurationInputs((prev) => ({
+            ...prev,
+            [schedule.id]: schedule.duration.toString(),
+          }));
+          return;
+        }
 
-    // Store the timer
-    setDebouncedUpdates(prev => ({
-      ...prev,
-      [schedule.id]: timer
-    }));
-  }, [schedules, onSchedulesChange, debouncedUpdates]);
+        onSchedulesChange(
+          schedules.map((s) =>
+            s.id === schedule.id ? { ...schedule, duration } : s
+          )
+        );
+        setError(null);
+
+        // Clear the timer reference
+        setDebouncedUpdates((prev) => {
+          const newUpdates = { ...prev };
+          delete newUpdates[schedule.id];
+          return newUpdates;
+        });
+      }, DURATION_DEBOUNCE_MS);
+
+      // Store the timer
+      setDebouncedUpdates((prev) => ({
+        ...prev,
+        [schedule.id]: timer,
+      }));
+    },
+    [schedules, onSchedulesChange, debouncedUpdates]
+  );
 
   // Initialize duration inputs
   useEffect(() => {
-    const inputs: {[key: string]: string} = {};
-    schedules.forEach(schedule => {
+    const inputs: { [key: string]: string } = {};
+    schedules.forEach((schedule) => {
       if (!durationInputs[schedule.id]) {
         inputs[schedule.id] = schedule.duration.toString();
       }
     });
     if (Object.keys(inputs).length > 0) {
-      setDurationInputs(prev => ({ ...prev, ...inputs }));
+      setDurationInputs((prev) => ({ ...prev, ...inputs }));
     }
   }, [schedules]);
 
@@ -208,7 +235,7 @@ export function CronScheduleTable({
                 setError(null);
               }}
               className={`p-2 border rounded w-full dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
-                error?.field === 'new-expression' ? "border-red-500" : ""
+                error?.field === "new-expression" ? "border-red-500" : ""
               }`}
             />
           </div>
@@ -220,7 +247,7 @@ export function CronScheduleTable({
               placeholder="Duration (minutes)"
               value={newSchedule.durationInput}
               onChange={(e) => {
-                const value = e.target.value.replace(/\D/g, '');
+                const value = e.target.value.replace(/\D/g, "");
                 setNewSchedule({
                   ...newSchedule,
                   durationInput: value,
@@ -228,7 +255,7 @@ export function CronScheduleTable({
                 setError(null);
               }}
               className={`p-2 border rounded w-full dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
-                error?.field === 'new-duration' ? "border-red-500" : ""
+                error?.field === "new-duration" ? "border-red-500" : ""
               }`}
             />
           </div>
@@ -261,53 +288,68 @@ export function CronScheduleTable({
         {schedules.map((schedule) => (
           <div
             key={schedule.id}
-            className="flex items-center justify-between p-2 border rounded dark:border-gray-700"
+            className="flex items-center space-x-4 justify-between p-2 border rounded dark:border-gray-700"
             style={{ backgroundColor: schedule.color + "20" }}
           >
-            <div className="flex items-center space-x-4">
-              <input
-                type="checkbox"
-                checked={schedule.isActive}
-                onChange={(e) =>
+            <input
+              type="checkbox"
+              checked={schedule.isActive}
+              onChange={(e) =>
+                handleUpdateSchedule({
+                  ...schedule,
+                  isActive: e.target.checked,
+                })
+              }
+              className="w-4 h-4 flex-none"
+            />
+            <input
+              type="color"
+              value={schedule.color || "#000000"}
+              onChange={(e) => {
+                const color = e.target.value;
+                if (schedule) {
+                  releaseColor(schedule.color); // Release the old color
                   handleUpdateSchedule({
                     ...schedule,
-                    isActive: e.target.checked,
-                  })
+                    color,
+                  });
                 }
-                className="w-4 h-4"
-              />
-              <span className="font-medium text-gray-900 dark:text-white">
-                {schedule.name}
-              </span>
-              <span className="text-sm text-gray-600 dark:text-gray-300">
-                {schedule.expression}
-              </span>
-              <input
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                value={durationInputs[schedule.id] || schedule.duration}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/\D/g, '');
-                  setDurationInputs(prev => ({
-                    ...prev,
-                    [schedule.id]: value
-                  }));
-                  handleDebouncedUpdate(schedule, value);
-                }}
-                className={`w-20 p-1 border rounded text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
-                  error?.field === schedule.id ? "border-red-500" : ""
-                }`}
-              />
-              <span className="text-sm text-gray-600 dark:text-gray-300">
-                min
-              </span>
-            </div>
+              }}
+              className="w-4 h-4 cursor-pointer rounded-full flex-none"
+              title="Choose any color"
+            />
+            <span className="font-medium text-gray-900 dark:text-white grow flex justify-start">
+              {schedule.name}
+            </span>
+            <span className="text-sm text-gray-600 dark:text-gray-300 grow flex justify-end">
+              {schedule.expression}
+            </span>
+            <input
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              value={durationInputs[schedule.id] || schedule.duration}
+              onChange={(e) => {
+                const value = e.target.value.replace(/\D/g, "").slice(0, 5);
+                setDurationInputs((prev) => ({
+                  ...prev,
+                  [schedule.id]: value,
+                }));
+                handleDebouncedUpdate(schedule, value);
+              }}
+              className={`w-14 p-1 border rounded text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white text-center flex-none ${
+                error?.field === schedule.id ? "border-red-500" : ""
+              }`}
+            />
+            <span className="text-sm text-gray-600 dark:text-gray-300 flex-none">
+              min
+            </span>
             <button
               onClick={() => handleDeleteSchedule(schedule.id)}
-              className="p-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+              className="p-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20"
+              title="Delete schedule"
             >
-              Delete
+              <XMarkIcon className="w-4 h-4" />
             </button>
           </div>
         ))}

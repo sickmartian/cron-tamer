@@ -34,7 +34,7 @@ const TIMEZONES: TimezoneOption[] = (Intl as any).supportedValuesOf?.('timeZone'
 
 // Custom styles for react-select to handle dark mode and alignment
 const selectStyles = {
-  control: (base: any, state: any) => ({
+  control: (base: any) => ({
     ...base,
     backgroundColor: 'var(--select-bg)',
     borderColor: 'var(--select-border)',
