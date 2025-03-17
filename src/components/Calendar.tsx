@@ -121,15 +121,23 @@ export function Calendar({
           return (
             <div
               key={i}
-              className="min-h-[200px] bg-white dark:bg-gray-800 p-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+              className={`min-h-[200px] bg-white dark:bg-gray-800 p-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 ${
+                currentDayStart.hasSame(DateTime.now().setZone(projectionTimezone), 'day') 
+                ? 'ring-2 ring-blue-500 dark:ring-blue-400' 
+                : ''
+              }`}
               onClick={() => onDaySelect(currentDayStart)}
             >
-              <div className="text-sm font-medium mb-2 text-gray-900 dark:text-white">
+              <div className={`text-sm font-medium mb-2 ${
+                currentDayStart.hasSame(DateTime.now().setZone(projectionTimezone), 'day')
+                ? 'text-blue-500 dark:text-blue-400'
+                : 'text-gray-900 dark:text-white'
+              }`}>
                 {i + 1}
               </div>
               <DayGrid
                 timeSlots={daySlots}
-                currentDayStart={currentDayStart}
+                pCurrentDayStart={currentDayStart}
                 schedules={schedules}
                 selectedSlot={selectedSlot}
                 onSlotSelect={onSlotSelect}

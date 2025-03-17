@@ -1,11 +1,13 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { CronSchedule } from "../types";
 import {
   generateColor,
   parseCronExpression,
   releaseColor,
+  TIME_UPDATE_FREQUENCY_MS,
 } from "../utils";
 import { XMarkIcon } from "@heroicons/react/24/outline";
+import { DateTime } from "luxon";
 
 const MAX_DURATION_MINUTES = 28 * 24 * 60; // 28 days in minutes
 const MIN_DURATION_MINUTES = 1;
@@ -14,6 +16,8 @@ const DURATION_DEBOUNCE_MS = 500; // 500ms debounce for duration changes
 interface CronScheduleTableProps {
   schedules: CronSchedule[];
   onSchedulesChange: (schedules: CronSchedule[]) => void;
+  timezone: string;
+  projectionTimezone: string;
 }
 
 type ErrorState = {
@@ -24,6 +28,8 @@ type ErrorState = {
 export function CronScheduleTable({
   schedules,
   onSchedulesChange,
+  timezone,
+  projectionTimezone,
 }: CronScheduleTableProps) {
   const [newSchedule, setNewSchedule] = useState<
     Partial<CronSchedule> & { durationInput?: string }
@@ -40,6 +46,8 @@ export function CronScheduleTable({
   const [durationInputs, setDurationInputs] = useState<{
     [key: string]: string;
   }>({});
+  const [currentTime, setCurrentTime] = useState<DateTime>(DateTime.now().setZone(projectionTimezone));
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Auto-clear error after 3 seconds
   useEffect(() => {
@@ -57,6 +65,18 @@ export function CronScheduleTable({
       Object.values(debouncedUpdates).forEach((timer) => clearTimeout(timer));
     };
   }, [debouncedUpdates]);
+
+  // Update current time every minute
+  useEffect(() => {
+    intervalRef.current = setInterval(() => {
+      setCurrentTime(DateTime.now().setZone(projectionTimezone));
+    }, TIME_UPDATE_FREQUENCY_MS);
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [projectionTimezone]);
 
   const validateCronExpression = (expression: string): boolean => {
     try {
@@ -211,6 +231,23 @@ export function CronScheduleTable({
     }
   }, [schedules]);
 
+  const isScheduleRunning = (schedule: CronSchedule): boolean => {
+    try {
+      const occurrences = parseCronExpression(
+        schedule.expression,
+        currentTime.toJSDate(),
+        timezone,
+      );
+
+      return occurrences.some(startTime => {
+        const endTime = startTime.plus({ minutes: schedule.duration });
+        return currentTime >= startTime && currentTime < endTime;
+      });
+    } catch (err) {
+      return false;
+    }
+  };
+
   return (
     <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
       <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
@@ -282,7 +319,11 @@ export function CronScheduleTable({
         {schedules.map((schedule) => (
           <div
             key={schedule.id}
-            className="flex items-center space-x-4 justify-between p-2 border rounded dark:border-gray-700"
+            className={`flex items-center space-x-4 justify-between p-2 border rounded dark:border-gray-700 ${
+              isScheduleRunning(schedule)
+                ? 'ring-2 ring-blue-500 dark:ring-blue-400'
+                : ''
+            }`}
             style={{ backgroundColor: schedule.color + "20" }}
           >
             <input

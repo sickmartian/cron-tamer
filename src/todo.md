@@ -32,15 +32,16 @@ http://localhost:5173/#eyJ0aW1lem9uZSI6IlVUQyIsInByb2plY3Rpb25UaW1lem9uZSI6IlVUQ
 - [x] More TZs
 - [x] More colors
 - [x] Color selection after creation
-- [ ] Current time should show up in the calendar
-- [ ] Currently running jobs should be somehow highlighted
-- [ ] Current day should be shown differntly in the Calendar
+- [x] Current time should show up in the calendar
+- [x] Currently running jobs should be somehow highlighted
+- [x] Current day should be shown differntly in the Calendar
 - [ ] Back button should be a calendar icon instead
 - [ ] Small jobs should show a smaller text, not skip it
 - [ ] When long text and long cron exp, we want long text to win
 - [ ] When long text and wrap, we want both lines to be aligned to the left to give the impression of a table
 - [ ] Performance
-- [ ] Double call to cron parsing shouldn't happen
+  - [ ] Double call to cron parsing shouldn't happen
+  - [ ] Inside cron editor we are calling the parsing for 2 months, that's a bit too much...
 - [x] Branding
   - [x] Title
   - [x] Icons

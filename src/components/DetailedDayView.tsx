@@ -151,7 +151,7 @@ export function DetailedDayView({
           <div className="h-[600px]">
             <DayGrid
               timeSlots={daySlots}
-              currentDayStart={projectedDay}
+              pCurrentDayStart={projectedDay}
               schedules={schedules}
               selectedSlot={selectedSlot}
               onSlotSelect={onSlotSelect}

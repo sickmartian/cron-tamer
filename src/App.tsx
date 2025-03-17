@@ -326,7 +326,7 @@ It's particularly useful in case different jobs are sharing resources and need t
                 options={TIMEZONES}
                 value={TIMEZONES.find((tz: TimezoneOption) => tz.value === timezone)}
                 onChange={(option) => option && setTimezone(option.value)}
-                className="flex-1 min-w-[200px]"
+                className="flex-1 min-w-[200px] z-50"
                 styles={selectStyles}
                 classNamePrefix="react-select"
               />
@@ -337,7 +337,7 @@ It's particularly useful in case different jobs are sharing resources and need t
                 options={TIMEZONES}
                 value={TIMEZONES.find((tz: TimezoneOption) => tz.value === projectionTimezone)}
                 onChange={(option) => option && setProjectionTimezone(option.value)}
-                className="flex-1 min-w-[200px]"
+                className="flex-1 min-w-[200px] z-50"
                 styles={selectStyles}
                 classNamePrefix="react-select"
               />
@@ -348,6 +348,8 @@ It's particularly useful in case different jobs are sharing resources and need t
               <CronScheduleTable
                 schedules={schedules}
                 onSchedulesChange={setSchedules}
+                timezone={timezone}
+                projectionTimezone={projectionTimezone}
               />
             </div>
             <div>
