@@ -58,6 +58,20 @@ const formatTimeFromSeconds = (seconds: number): string => {
     .padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
 };
 
+// Add a CSS class or style to handle text scaling
+const getTextStyle = (widthPercent: number) => {
+  if (widthPercent < 5) {
+    return null; // Too small to show text
+  } else if (widthPercent < 10) {
+    return { fontSize: "0.6rem", letterSpacing: "-0.05em" };
+  } else if (widthPercent < 15) {
+    return { fontSize: "0.7rem", letterSpacing: "-0.03em" };
+  } else if (widthPercent < 20) {
+    return { fontSize: "0.75rem" };
+  }
+  return { fontSize: "0.875rem" }; // Default size (text-sm in Tailwind)
+};
+
 export function DayGrid({
   timeSlots,
   pCurrentDayStart,
@@ -531,15 +545,28 @@ export function DayGrid({
                   title={getBarTitle(bar)}
                   onClick={(e) => handleBarClick(e, bar, barKey)}
                 >
-                  {isDetailedView && widthPercent > 20 && !bar.isCollision && (
-                    <span className="text-xs text-white font-medium truncate px-1">
-                      {bar.slot.scheduleName}
-                    </span>
-                  )}
-                  {isDetailedView && widthPercent > 30 && bar.isCollision && (
-                    <span className="text-xs text-white font-bold truncate px-1">
-                      COLLISION
-                    </span>
+                  {isDetailedView && (
+                    <>
+                      {!bar.isCollision &&
+                        (() => {
+                          const textStyle = getTextStyle(widthPercent);
+                          return (
+                            textStyle && (
+                              <span
+                                className="text-white font-medium truncate px-1 select-none"
+                                style={textStyle}
+                              >
+                                {bar.slot.scheduleName}
+                              </span>
+                            )
+                          );
+                        })()}
+                      {bar.isCollision && widthPercent > 30 && (
+                        <span className="text-xs text-white font-bold truncate px-1">
+                          COLLISION
+                        </span>
+                      )}
+                    </>
                   )}
                 </div>
               );
