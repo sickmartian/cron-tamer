@@ -2,7 +2,7 @@ import { useMemo, useEffect } from "react";
 import { CronSchedule, TimeSlot } from "../types";
 import { DateTime, Interval } from "luxon";
 import { DayGrid } from "./DayGrid";
-import { ChevronLeftIcon, ChevronRightIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { ChevronLeftIcon, ChevronRightIcon, CalendarIcon } from '@heroicons/react/24/outline';
 
 interface DetailedDayViewProps {
   timeSlots: TimeSlot[];
@@ -109,7 +109,7 @@ export function DetailedDayView({
             className="p-2 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600"
             aria-label="Back to calendar"
           >
-            <ArrowLeftIcon className="h-5 w-5" />
+            <CalendarIcon className="h-5 w-5" />
           </button>
         </div>
       </div>

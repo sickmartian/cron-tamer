@@ -35,7 +35,7 @@ http://localhost:5173/#eyJ0aW1lem9uZSI6IlVUQyIsInByb2plY3Rpb25UaW1lem9uZSI6IlVUQ
 - [x] Current time should show up in the calendar
 - [x] Currently running jobs should be somehow highlighted
 - [x] Current day should be shown differntly in the Calendar
-- [ ] Back button should be a calendar icon instead
+- [x] Back button should be a calendar icon instead
 - [x] Small jobs should show a smaller text, not skip it
 - [ ] When long text and long cron exp, we want long text to win
 - [ ] When long text and wrap, we want both lines to be aligned to the left to give the impression of a table
