@@ -37,11 +37,15 @@ http://localhost:5173/#eyJ0aW1lem9uZSI6IlVUQyIsInByb2plY3Rpb25UaW1lem9uZSI6IlVUQ
 - [x] Current day should be shown differntly in the Calendar
 - [x] Back button should be a calendar icon instead
 - [x] Small jobs should show a smaller text, not skip it
+- [ ] Change title of app and window to user defined one
 - [ ] When long text and long cron exp, we want long text to win
 - [ ] When long text and wrap, we want both lines to be aligned to the left to give the impression of a table
+- [ ] Editing the cron expression and name
+- [ ] Moving the expressions through the list
 - [ ] Performance
   - [ ] Double call to cron parsing shouldn't happen
   - [ ] Inside cron editor we are calling the parsing for 2 months, that's a bit too much...
+  - [ ] It's just very bad with recurrent things like `0 0/1 * * *`
 - [x] Branding
   - [x] Title
   - [x] Icons
