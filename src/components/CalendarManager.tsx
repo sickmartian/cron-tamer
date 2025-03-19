@@ -7,16 +7,12 @@ import { DateTime } from "luxon";
 
 interface CalendarManagerProps {
   schedules: CronSchedule[];
-  selectedSlot: TimeSlot | null;
-  onSlotSelect: (slot: TimeSlot) => void;
   timezone: string;
   projectionTimezone: string;
 }
 
 export function CalendarManager({
   schedules,
-  selectedSlot,
-  onSlotSelect,
   timezone,
   projectionTimezone,
 }: CalendarManagerProps) {
@@ -101,8 +97,6 @@ export function CalendarManager({
           timeSlots={timeSlots}
           currentDayStart={selectedDay}
           schedules={schedules}
-          selectedSlot={selectedSlot}
-          onSlotSelect={onSlotSelect}
           onBackToCalendar={handleBackToCalendar}
           onPrevDay={handlePrevDay}
           onNextDay={handleNextDay}
@@ -112,8 +106,6 @@ export function CalendarManager({
       ) : (
         <Calendar
           schedules={schedules}
-          selectedSlot={selectedSlot}
-          onSlotSelect={onSlotSelect}
           timezone={timezone}
           projectionTimezone={projectionTimezone}
           onDaySelect={handleDaySelect}

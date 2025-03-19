@@ -7,8 +7,6 @@ interface DayGridProps {
   timeSlots: TimeSlot[];
   pCurrentDayStart: DateTime;
   schedules: CronSchedule[];
-  selectedSlot: TimeSlot | null;
-  onSlotSelect: (slot: TimeSlot) => void;
   isDetailedView?: boolean;
 }
 
@@ -76,12 +74,11 @@ export function DayGrid({
   timeSlots,
   pCurrentDayStart,
   schedules,
-  selectedSlot,
-  onSlotSelect,
   isDetailedView = false,
 }: DayGridProps) {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const [popover, setPopover] = useState<PopoverInfo | null>(null);
+  const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentTime, setCurrentTime] = useState<DateTime>(
@@ -115,16 +112,17 @@ export function DayGrid({
 
   // Close popover when clicking outside
   useEffect(() => {
+    // Only add the event listener if the popover is open
+    if (!popover) return;
+
     const handleClickOutside = (event: MouseEvent) => {
+      // Check if click was outside the popover
       if (
         popoverRef.current &&
-        !popoverRef.current.contains(event.target as Node) &&
-        event.target instanceof Element &&
-        !event.target.closest('[data-bar="true"]')
+        !popoverRef.current.contains(event.target as Node)
       ) {
-        // Clear both the popover and the selected slot
         setPopover(null);
-        onSlotSelect(null as any);
+        setSelectedSlot(null);
       }
     };
 
@@ -132,7 +130,7 @@ export function DayGrid({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [onSlotSelect]);
+  }, [popover]); // Only depends on popover state, not on any external state
 
   // Clear popover when selected slot changes externally
   useEffect(() => {
@@ -474,12 +472,12 @@ export function DayGrid({
 
     if (isToggling) {
       // Unselect the slot
-      onSlotSelect(null as any);
+      setSelectedSlot(null as any);
       setPopover(null);
     } else {
       // Only select non-collision bars
       if (!bar.isCollision) {
-        onSlotSelect(bar.slot);
+        setSelectedSlot(bar.slot);
       }
 
       // Use mouse coordinates for popover positioning

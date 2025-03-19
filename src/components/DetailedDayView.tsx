@@ -8,8 +8,6 @@ interface DetailedDayViewProps {
   timeSlots: TimeSlot[];
   currentDayStart: DateTime;
   schedules: CronSchedule[];
-  selectedSlot: TimeSlot | null;
-  onSlotSelect: (slot: TimeSlot) => void;
   onBackToCalendar: () => void;
   onPrevDay: () => void;
   onNextDay: () => void;
@@ -21,8 +19,6 @@ export function DetailedDayView({
   timeSlots,
   currentDayStart,
   schedules,
-  selectedSlot,
-  onSlotSelect,
   onBackToCalendar,
   onPrevDay,
   onNextDay,
@@ -153,8 +149,6 @@ export function DetailedDayView({
               timeSlots={daySlots}
               pCurrentDayStart={projectedDay}
               schedules={schedules}
-              selectedSlot={selectedSlot}
-              onSlotSelect={onSlotSelect}
               isDetailedView={true}
             />
           </div>

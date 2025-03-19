@@ -5,8 +5,6 @@ import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 
 interface CalendarProps {
   schedules: CronSchedule[];
-  selectedSlot: TimeSlot | null;
-  onSlotSelect: (slot: TimeSlot) => void;
   timezone: string;
   projectionTimezone: string;
   onDaySelect: (day: DateTime) => void;
@@ -17,8 +15,6 @@ interface CalendarProps {
 
 export function Calendar({
   schedules,
-  selectedSlot,
-  onSlotSelect,
   timezone,
   projectionTimezone,
   onDaySelect,
@@ -139,8 +135,6 @@ export function Calendar({
                 timeSlots={daySlots}
                 pCurrentDayStart={currentDayStart}
                 schedules={schedules}
-                selectedSlot={selectedSlot}
-                onSlotSelect={onSlotSelect}
               />
             </div>
           );
