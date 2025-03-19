@@ -3,6 +3,8 @@ import { CronSchedule, TimeSlot } from "./types";
 import { parseExpression } from "cron-parser";
 
 export const TIME_UPDATE_FREQUENCY_MS = 1000;
+export const MAX_DURATION_MINUTES = 28 * 24 * 60; // 28 days in minutes
+export const MIN_DURATION_MINUTES = 1;
 
 // Colors from Reasonable Colors that work well in both light and dark modes
 // Each color has good contrast against white and black backgrounds

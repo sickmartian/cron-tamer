@@ -42,10 +42,11 @@ http://localhost:5173/#eyJ0aW1lem9uZSI6IlVUQyIsInByb2plY3Rpb25UaW1lem9uZSI6IlVUQ
 - [ ] When long text and wrap, we want both lines to be aligned to the left to give the impression of a table
 - [ ] Editing the cron expression and name
 - [ ] Moving the expressions through the list
-- [ ] Performance
+- [x] Performance
   - [ ] Double call to cron parsing shouldn't happen
   - [ ] Inside cron editor we are calling the parsing for 2 months, that's a bit too much...
   - [ ] It's just very bad with recurrent things like `0 0/1 * * *`
+  - [x] Gratuitus re-renders when anything changes
 - [x] Branding
   - [x] Title
   - [x] Icons

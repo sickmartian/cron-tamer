@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import { CronSchedule, TimeSlot } from "./types";
-import { CronSchedulePanel } from "./components/CronScheduleTable";
+import { CronSchedule } from "./types";
+import { CronSchedulePanel } from "./components/CronSchedulePanel";
 import { CalendarManager } from "./components/CalendarManager";
 import { Settings } from "./components/Settings";
 import About from "./components/About";

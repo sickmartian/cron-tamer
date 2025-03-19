@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { CronSchedule, TimeSlot } from "../types";
+import { CronSchedule } from "../types";
 import { Calendar } from "./Calendar";
 import { DetailedDayView } from "./DetailedDayView";
 import { generateTimeSlots } from "../utils";
