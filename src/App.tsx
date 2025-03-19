@@ -164,6 +164,7 @@ export default function App() {
   const [showAbout, setShowAbout] = useState(false);
   const [appTitle, setAppTitle] = useState<string>("Cron Tamer");
   const [editingTitle, setEditingTitle] = useState(false);
+  const [titleInput, setTitleInput] = useState<string>("Cron Tamer");
 
   // Load state from URL hash or initialize with demo data
   useEffect(() => {
@@ -188,6 +189,7 @@ export default function App() {
 
           if (state.appTitle) {
             setAppTitle(state.appTitle);
+            setTitleInput(state.appTitle);
           }
         }
       } else if (!hasVisitedBefore) {
@@ -201,6 +203,18 @@ export default function App() {
       setHasLoadedFromURL(true);
     }
   }, []);
+
+  // Start title editing with current value
+  const startTitleEditing = () => {
+    setTitleInput(appTitle);
+    setEditingTitle(true);
+  };
+
+  // Finish title editing and update the main state
+  const finishTitleEditing = () => {
+    setAppTitle(titleInput || "Cron Tamer");
+    setEditingTitle(false);
+  };
 
   // Update document title when appTitle changes
   useEffect(() => {
@@ -295,11 +309,15 @@ It's particularly useful in case different jobs are sharing resources and need t
           {editingTitle ? (
             <input
               type="text"
-              value={appTitle}
-              onChange={(e) => setAppTitle(e.target.value)}
-              onBlur={() => setEditingTitle(false)}
+              value={titleInput}
+              onChange={(e) => setTitleInput(e.target.value)}
+              onBlur={finishTitleEditing}
               onKeyDown={(e) => {
-                if (e.key === 'Enter') setEditingTitle(false);
+                if (e.key === 'Enter') finishTitleEditing();
+                if (e.key === 'Escape') {
+                  setTitleInput(appTitle); // Reset to original value
+                  setEditingTitle(false);
+                }
               }}
               autoFocus
               className="text-2xl font-bold py-1 px-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white"
@@ -307,7 +325,7 @@ It's particularly useful in case different jobs are sharing resources and need t
           ) : (
             <h1 
               className="text-2xl font-bold text-gray-900 dark:text-white cursor-pointer hover:text-blue-500 dark:hover:text-blue-400"
-              onClick={() => setEditingTitle(true)}
+              onClick={startTitleEditing}
               title="Click to edit title"
             >
               {appTitle}
