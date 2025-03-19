@@ -1,6 +1,12 @@
 import { useState, useEffect, useCallback, useRef, memo } from "react";
 import { CronSchedule } from "../types";
-import { MAX_DURATION_MINUTES, MIN_DURATION_MINUTES, parseCronExpression, releaseColor, TIME_UPDATE_FREQUENCY_MS } from "../utils";
+import {
+  MAX_DURATION_MINUTES,
+  MIN_DURATION_MINUTES,
+  parseCronExpression,
+  releaseColor,
+  TIME_UPDATE_FREQUENCY_MS,
+} from "../utils";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { DateTime } from "luxon";
 
@@ -12,7 +18,7 @@ interface CronScheduleListProps {
   projectionTimezone: string;
   onUpdateSchedule: (updatedSchedule: CronSchedule) => void;
   onDeleteSchedule: (scheduleId: string) => void;
-  onError: (message: string, field: string) => void;
+  onError: (message: string) => void;
   clearError: () => void;
 }
 
@@ -23,7 +29,7 @@ function CronScheduleListComponent({
   onUpdateSchedule,
   onDeleteSchedule,
   onError,
-  clearError
+  clearError,
 }: CronScheduleListProps) {
   const [debouncedUpdates, setDebouncedUpdates] = useState<{
     [key: string]: NodeJS.Timeout;
@@ -35,7 +41,7 @@ function CronScheduleListComponent({
     DateTime.now().setZone(projectionTimezone)
   );
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  
+
   // Cleanup debounce timers on unmount
   useEffect(() => {
     return () => {
@@ -68,13 +74,15 @@ function CronScheduleListComponent({
     }
   }, [schedules]);
 
-  const validateDuration = (duration: number, field: string): boolean => {
+  const validateDuration = (duration: number): boolean => {
     if (duration < MIN_DURATION_MINUTES) {
-      onError(`Duration must be at least ${MIN_DURATION_MINUTES} minute`, field);
+      onError(`Duration must be at least ${MIN_DURATION_MINUTES} minute`);
       return false;
     }
     if (duration > MAX_DURATION_MINUTES) {
-      onError(`Duration cannot exceed ${MAX_DURATION_MINUTES} minutes (28 days)`, field);
+      onError(
+        `Duration cannot exceed ${MAX_DURATION_MINUTES} minutes (28 days)`
+      );
       return false;
     }
     return true;
@@ -90,7 +98,7 @@ function CronScheduleListComponent({
       // Set new timer
       const timer = setTimeout(() => {
         const duration = parseInt(inputValue);
-        if (!validateDuration(duration, schedule.id)) {
+        if (!validateDuration(duration)) {
           // Revert to last valid value
           setDurationInputs((prev) => ({
             ...prev,
@@ -127,15 +135,40 @@ function CronScheduleListComponent({
     onDeleteSchedule(scheduleId);
   };
 
+  let cronCache: {
+    [tz: string]: {
+      [exp: string]: {
+        [time: string]: DateTime[];
+      };
+    };
+  } = {};
   const isScheduleRunning = (schedule: CronSchedule): boolean => {
     try {
-      const occurrences = parseCronExpression(
-        schedule.expression,
-        currentTime.toJSDate(),
-        timezone,
-      );
+      const currentTimeNoSeconds = currentTime.toFormat("yyyy-MM-dd HH:mm");
+      if (!currentTimeNoSeconds) return false;
 
-      return occurrences.some(startTime => {
+      let occurrences: DateTime[] = [];
+      if (cronCache[timezone]?.[schedule.expression]?.[currentTimeNoSeconds]) {
+        occurrences =
+          cronCache[timezone][schedule.expression][currentTimeNoSeconds];
+      } else {
+        if (!cronCache[timezone]) {
+          cronCache = {}; // in case of tz change
+          cronCache[timezone] = {};
+        }
+        if (!cronCache[timezone][schedule.expression]) {
+          cronCache[timezone][schedule.expression] = {};
+        }
+        occurrences = parseCronExpression(
+          schedule.expression,
+          currentTime.toJSDate(),
+          timezone
+        );
+        cronCache[timezone][schedule.expression][currentTimeNoSeconds] =
+          occurrences;
+      }
+
+      return occurrences.some((startTime) => {
         const endTime = startTime.plus({ minutes: schedule.duration });
         return currentTime >= startTime && currentTime < endTime;
       });
@@ -151,8 +184,8 @@ function CronScheduleListComponent({
           key={schedule.id}
           className={`flex items-center space-x-4 justify-between p-2 border rounded dark:border-gray-700 ${
             isScheduleRunning(schedule)
-              ? 'ring-2 ring-blue-500 dark:ring-blue-400'
-              : ''
+              ? "ring-2 ring-blue-500 dark:ring-blue-400"
+              : ""
           }`}
           style={{ backgroundColor: schedule.color + "20" }}
         >
@@ -220,4 +253,4 @@ function CronScheduleListComponent({
   );
 }
 
-export const CronScheduleList = memo(CronScheduleListComponent); 
+export const CronScheduleList = memo(CronScheduleListComponent);

@@ -20,12 +20,10 @@ function CronScheduleAdderComponent({
   onError,
   clearError,
 }: CronScheduleAdderProps) {
-  const [newSchedule, setNewSchedule] = useState<
-    Partial<CronSchedule> & { durationInput?: string }
-  >({
+  const [newSchedule, setNewSchedule] = useState<Partial<CronSchedule>>({
     name: "",
     expression: "",
-    durationInput: "30",
+    duration: 30,
     isActive: true,
   });
 
@@ -39,18 +37,22 @@ function CronScheduleAdderComponent({
     }
   };
 
-  const validateDuration = (duration: number, field: string): boolean => {
+  const validateDuration = (duration?: number): boolean => {
+    if (duration === undefined || duration === null) {
+      onError("Duration is required", "new-duration");
+      return false;
+    }
     if (duration < MIN_DURATION_MINUTES) {
       onError(
         `Duration must be at least ${MIN_DURATION_MINUTES} minute`,
-        field
+        "new-duration"
       );
       return false;
     }
     if (duration > MAX_DURATION_MINUTES) {
       onError(
         `Duration cannot exceed ${MAX_DURATION_MINUTES} minutes (28 days)`,
-        field
+        "new-duration"
       );
       return false;
     }
@@ -65,8 +67,7 @@ function CronScheduleAdderComponent({
       return;
     }
 
-    const duration = parseInt(newSchedule.durationInput || "30");
-    if (!validateDuration(duration, "new-duration")) {
+    if (!validateDuration(newSchedule.duration)) {
       return;
     }
 
@@ -79,7 +80,7 @@ function CronScheduleAdderComponent({
       id: crypto.randomUUID(),
       name,
       expression: newSchedule.expression,
-      duration,
+      duration: newSchedule.duration!,
       isActive: newSchedule.isActive ?? true,
       color: generateColor(schedulesLength),
     };
@@ -88,7 +89,7 @@ function CronScheduleAdderComponent({
     setNewSchedule({
       name: "",
       expression: "",
-      durationInput: "30",
+      duration: 30,
       isActive: true,
     });
     clearError();
@@ -115,12 +116,12 @@ function CronScheduleAdderComponent({
             inputMode="numeric"
             pattern="[0-9]*"
             placeholder="Duration (minutes)"
-            value={newSchedule.durationInput}
+            value={newSchedule.duration}
             onChange={(e) => {
               const value = e.target.value.replace(/\D/g, "");
               setNewSchedule({
                 ...newSchedule,
-                durationInput: value,
+                duration: parseInt(value),
               });
               clearError();
             }}

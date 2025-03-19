@@ -3,7 +3,6 @@ import { memo } from "react";
 interface CronScheduleErrorProps {
   error: {
     message: string;
-    field: string;
   } | null;
 }
 
