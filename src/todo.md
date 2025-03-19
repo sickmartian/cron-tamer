@@ -40,7 +40,7 @@ http://localhost:5173/#eyJ0aW1lem9uZSI6IlVUQyIsInByb2plY3Rpb25UaW1lem9uZSI6IlVUQ
 - [x] Change title of app and window to user defined one
 - [ ] When long text and long cron exp, we want long text to win
 - [ ] When long text and wrap, we want both lines to be aligned to the left to give the impression of a table
-- [ ] Editing the cron expression and name
+- [x] Editing the cron expression and name
 - [ ] Moving the expressions through the list
 - [x] Performance
   - [ ] Double call to cron parsing shouldn't happen

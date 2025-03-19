@@ -22,6 +22,12 @@ interface CronScheduleListProps {
   clearError: () => void;
 }
 
+interface InputState {
+  duration: { [key: string]: string };
+  name: { [key: string]: string };
+  expression: { [key: string]: string };
+}
+
 function CronScheduleListComponent({
   schedules,
   timezone,
@@ -34,13 +40,18 @@ function CronScheduleListComponent({
   const [debouncedUpdates, setDebouncedUpdates] = useState<{
     [key: string]: NodeJS.Timeout;
   }>({});
-  const [durationInputs, setDurationInputs] = useState<{
-    [key: string]: string;
-  }>({});
+  const [inputState, setInputState] = useState<InputState>({
+    duration: {},
+    name: {},
+    expression: {},
+  });
   const [currentTime, setCurrentTime] = useState<DateTime>(
     DateTime.now().setZone(projectionTimezone)
   );
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [editingSchedule, setEditingSchedule] = useState<{
+    [key: string]: { name: boolean; expression: boolean };
+  }>({});
 
   // Cleanup debounce timers on unmount
   useEffect(() => {
@@ -61,16 +72,33 @@ function CronScheduleListComponent({
     };
   }, [projectionTimezone]);
 
-  // Initialize duration inputs
+  // Initialize input states
   useEffect(() => {
-    const inputs: { [key: string]: string } = {};
+    const newInputs: InputState = {
+      duration: { ...inputState.duration },
+      name: { ...inputState.name },
+      expression: { ...inputState.expression },
+    };
+
+    let hasNewInputs = false;
+
     schedules.forEach((schedule) => {
-      if (!durationInputs[schedule.id]) {
-        inputs[schedule.id] = schedule.duration.toString();
+      if (!newInputs.duration[schedule.id]) {
+        newInputs.duration[schedule.id] = schedule.duration.toString();
+        hasNewInputs = true;
+      }
+      if (!newInputs.name[schedule.id]) {
+        newInputs.name[schedule.id] = schedule.name;
+        hasNewInputs = true;
+      }
+      if (!newInputs.expression[schedule.id]) {
+        newInputs.expression[schedule.id] = schedule.expression;
+        hasNewInputs = true;
       }
     });
-    if (Object.keys(inputs).length > 0) {
-      setDurationInputs((prev) => ({ ...prev, ...inputs }));
+
+    if (hasNewInputs) {
+      setInputState(newInputs);
     }
   }, [schedules]);
 
@@ -88,44 +116,139 @@ function CronScheduleListComponent({
     return true;
   };
 
+  const validateExpression = (expression: string): boolean => {
+    try {
+      parseCronExpression(expression);
+      return true;
+    } catch (err) {
+      onError("Invalid cron expression");
+      return false;
+    }
+  };
+
+  // Generic debounced update function for any field
   const handleDebouncedUpdate = useCallback(
-    (schedule: CronSchedule, inputValue: string) => {
-      // Clear any existing timer for this schedule
-      if (debouncedUpdates[schedule.id]) {
-        clearTimeout(debouncedUpdates[schedule.id]);
+    (schedule: CronSchedule, field: keyof CronSchedule, value: any) => {
+      // Create a unique key for this field and schedule
+      const debounceKey = `${schedule.id}_${field}`;
+
+      // Clear any existing timer for this field and schedule
+      if (debouncedUpdates[debounceKey]) {
+        clearTimeout(debouncedUpdates[debounceKey]);
       }
 
       // Set new timer
       const timer = setTimeout(() => {
-        const duration = parseInt(inputValue);
-        if (!validateDuration(duration)) {
+        let isValid = true;
+        let updatedValue = value;
+
+        // Validate based on field type
+        if (field === "duration") {
+          const duration = parseInt(value);
+          isValid = validateDuration(duration);
+          updatedValue = duration;
+        } else if (field === "expression") {
+          isValid = validateExpression(value);
+        } else if (field === "name" && (!value || value.trim() === "")) {
+          // If name is empty, use expression
+          updatedValue = schedule.expression;
+        }
+
+        if (!isValid) {
           // Revert to last valid value
-          setDurationInputs((prev) => ({
-            ...prev,
-            [schedule.id]: schedule.duration.toString(),
-          }));
+          setInputState((prev) => {
+            const newState = { ...prev };
+            newState[field as keyof InputState][schedule.id] = schedule[
+              field
+            ] as string;
+            return newState;
+          });
           return;
         }
 
-        onUpdateSchedule({ ...schedule, duration });
+        // Update the schedule
+        const updatedSchedule = { ...schedule, [field]: updatedValue };
+        onUpdateSchedule(updatedSchedule);
         clearError();
 
         // Clear the timer reference
         setDebouncedUpdates((prev) => {
           const newUpdates = { ...prev };
-          delete newUpdates[schedule.id];
+          delete newUpdates[debounceKey];
           return newUpdates;
         });
+
+        // If we're done editing, clear the editing state
+        if (field === "name" || field === "expression") {
+          setEditingSchedule((prev) => {
+            const newState = { ...prev };
+            if (newState[schedule.id]) {
+              newState[schedule.id][field as "name" | "expression"] = false;
+            }
+            return newState;
+          });
+        }
       }, DURATION_DEBOUNCE_MS);
 
       // Store the timer
       setDebouncedUpdates((prev) => ({
         ...prev,
-        [schedule.id]: timer,
+        [debounceKey]: timer,
       }));
     },
     [debouncedUpdates, onUpdateSchedule, clearError]
   );
+
+  const handleInputChange = useCallback(
+    (schedule: CronSchedule, field: keyof InputState, value: string) => {
+      setInputState((prev) => {
+        const newState = { ...prev };
+        newState[field][schedule.id] = value;
+        return newState;
+      });
+
+      // For duration, start debounce immediately
+      // For name/expression, wait until user is done editing
+      if (
+        field === "duration" ||
+        !editingSchedule[schedule.id]?.[field as "name" | "expression"]
+      ) {
+        handleDebouncedUpdate(schedule, field as keyof CronSchedule, value);
+      }
+    },
+    [handleDebouncedUpdate, editingSchedule]
+  );
+
+  const handleStartEditing = (
+    scheduleId: string,
+    field: "name" | "expression"
+  ) => {
+    setEditingSchedule((prev) => {
+      const newState = { ...prev };
+      if (!newState[scheduleId]) {
+        newState[scheduleId] = { name: false, expression: false };
+      }
+      newState[scheduleId][field] = true;
+      return newState;
+    });
+  };
+
+  const handleFinishEditing = (
+    schedule: CronSchedule,
+    field: "name" | "expression"
+  ) => {
+    setEditingSchedule((prev) => {
+      const newState = { ...prev };
+      if (newState[schedule.id]) {
+        newState[schedule.id][field] = false;
+      }
+      return newState;
+    });
+
+    // Apply the debounced update
+    const value = inputState[field][schedule.id];
+    handleDebouncedUpdate(schedule, field, value);
+  };
 
   const handleDeleteSchedule = (scheduleId: string) => {
     const schedule = schedules.find((s) => s.id === scheduleId);
@@ -216,24 +339,86 @@ function CronScheduleListComponent({
             className="w-4 h-4 cursor-pointer rounded-full flex-none"
             title="Choose any color"
           />
-          <span className="font-medium text-gray-900 dark:text-white grow flex justify-start">
-            {schedule.name}
-          </span>
-          <span className="text-sm text-gray-600 dark:text-gray-300 grow flex justify-end">
-            {schedule.expression}
-          </span>
+
+          {/* Editable name */}
+          {editingSchedule[schedule.id]?.name ? (
+            <input
+              type="text"
+              value={inputState.name[schedule.id] || schedule.name}
+              onChange={(e) =>
+                handleInputChange(schedule, "name", e.target.value)
+              }
+              onBlur={() => handleFinishEditing(schedule, "name")}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleFinishEditing(schedule, "name");
+                if (e.key === "Escape") {
+                  setInputState((prev) => ({
+                    ...prev,
+                    name: {
+                      ...prev.name,
+                      [schedule.id]: schedule.name,
+                    },
+                  }));
+                  handleFinishEditing(schedule, "name");
+                }
+              }}
+              autoFocus
+              className="font-medium text-gray-900 dark:text-white grow p-1 border rounded dark:bg-gray-700 dark:border-gray-600"
+            />
+          ) : (
+            <span
+              className="font-medium text-gray-900 dark:text-white grow flex justify-start cursor-pointer hover:text-blue-500 dark:hover:text-blue-400"
+              onClick={() => handleStartEditing(schedule.id, "name")}
+              title="Click to edit name"
+            >
+              {schedule.name}
+            </span>
+          )}
+
+          {/* Editable expression */}
+          {editingSchedule[schedule.id]?.expression ? (
+            <input
+              type="text"
+              value={inputState.expression[schedule.id] || schedule.expression}
+              onChange={(e) =>
+                handleInputChange(schedule, "expression", e.target.value)
+              }
+              onBlur={() => handleFinishEditing(schedule, "expression")}
+              onKeyDown={(e) => {
+                if (e.key === "Enter")
+                  handleFinishEditing(schedule, "expression");
+                if (e.key === "Escape") {
+                  setInputState((prev) => ({
+                    ...prev,
+                    expression: {
+                      ...prev.expression,
+                      [schedule.id]: schedule.expression,
+                    },
+                  }));
+                  handleFinishEditing(schedule, "expression");
+                }
+              }}
+              autoFocus
+              className="text-sm text-gray-600 dark:text-gray-300 grow p-1 border rounded dark:bg-gray-700 dark:border-gray-600"
+            />
+          ) : (
+            <span
+              className="text-sm text-gray-600 dark:text-gray-300 grow flex justify-end cursor-pointer hover:text-blue-500 dark:hover:text-blue-400"
+              onClick={() => handleStartEditing(schedule.id, "expression")}
+              title="Click to edit expression"
+            >
+              {schedule.expression}
+            </span>
+          )}
+
           <input
             type="text"
             inputMode="numeric"
             pattern="[0-9]*"
-            value={durationInputs[schedule.id] || schedule.duration}
+            value={inputState.duration[schedule.id] || schedule.duration}
             onChange={(e) => {
               const value = e.target.value.replace(/\D/g, "").slice(0, 5);
-              setDurationInputs((prev) => ({
-                ...prev,
-                [schedule.id]: value,
-              }));
-              handleDebouncedUpdate(schedule, value);
+              handleInputChange(schedule, "duration", value);
             }}
             className="w-14 p-1 border rounded text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white text-center flex-none"
           />
