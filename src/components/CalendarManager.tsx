@@ -97,21 +97,21 @@ export function CalendarManager({
           timeSlots={timeSlots}
           currentDayStart={selectedDay}
           schedules={schedules}
+          projectionTimezone={projectionTimezone}
+          timezone={timezone}
           onBackToCalendar={handleBackToCalendar}
           onPrevDay={handlePrevDay}
           onNextDay={handleNextDay}
-          projectionTimezone={projectionTimezone}
-          timezone={timezone}
-        />
+          />
       ) : (
         <Calendar
           schedules={schedules}
           timezone={timezone}
           projectionTimezone={projectionTimezone}
-          onDaySelect={handleDaySelect}
           currentDate={currentDate}
-          setCurrentDate={handleSetCurrentDate}
           timeSlots={timeSlots}
+          setCurrentDate={handleSetCurrentDate}
+          onDaySelect={handleDaySelect}
         />
       )}
     </div>

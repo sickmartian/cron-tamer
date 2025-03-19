@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef, memo } from "react";
 import { CronSchedule } from "../types";
 import {
   generateColor,
@@ -15,9 +15,9 @@ const DURATION_DEBOUNCE_MS = 500; // 500ms debounce for duration changes
 
 interface CronScheduleTableProps {
   schedules: CronSchedule[];
-  onSchedulesChange: (schedules: CronSchedule[]) => void;
   timezone: string;
   projectionTimezone: string;
+  onSchedulesChange: (schedules: CronSchedule[]) => void;
 }
 
 type ErrorState = {
@@ -25,11 +25,11 @@ type ErrorState = {
   field: "new-expression" | "new-duration" | string; // string for schedule IDs
 };
 
-export function CronScheduleTable({
+function CronSchedulePanelComponent({
   schedules,
-  onSchedulesChange,
   timezone,
   projectionTimezone,
+  onSchedulesChange,
 }: CronScheduleTableProps) {
   const [newSchedule, setNewSchedule] = useState<
     Partial<CronSchedule> & { durationInput?: string }
@@ -392,3 +392,5 @@ export function CronScheduleTable({
     </div>
   );
 }
+
+export const CronSchedulePanel = memo(CronSchedulePanelComponent);

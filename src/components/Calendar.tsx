@@ -7,20 +7,20 @@ interface CalendarProps {
   schedules: CronSchedule[];
   timezone: string;
   projectionTimezone: string;
-  onDaySelect: (day: DateTime) => void;
   currentDate: Date;
-  setCurrentDate: (date: Date) => void;
   timeSlots: TimeSlot[];
+  setCurrentDate: (date: Date) => void;
+  onDaySelect: (day: DateTime) => void;
 }
 
 export function Calendar({
   schedules,
   timezone,
   projectionTimezone,
-  onDaySelect,
   currentDate,
-  setCurrentDate,
   timeSlots,
+  setCurrentDate,
+  onDaySelect,
 }: CalendarProps) {
   const daysInMonth = new Date(
     currentDate.getFullYear(),

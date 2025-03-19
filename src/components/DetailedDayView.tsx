@@ -8,22 +8,22 @@ interface DetailedDayViewProps {
   timeSlots: TimeSlot[];
   currentDayStart: DateTime;
   schedules: CronSchedule[];
+  timezone: string;
+  projectionTimezone: string;
   onBackToCalendar: () => void;
   onPrevDay: () => void;
   onNextDay: () => void;
-  timezone: string;
-  projectionTimezone: string;
 }
 
 export function DetailedDayView({
   timeSlots,
   currentDayStart,
   schedules,
+  timezone,
+  projectionTimezone,
   onBackToCalendar,
   onPrevDay,
   onNextDay,
-  timezone,
-  projectionTimezone,
 }: DetailedDayViewProps) {
   // Add escape key handler
   useEffect(() => {

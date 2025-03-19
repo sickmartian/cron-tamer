@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useRef } from "react";
+import { useMemo, useState, useEffect, useRef, memo } from "react";
 import { TimeSlot, CronSchedule } from "../types";
 import { DateTime } from "luxon";
 import { TIME_UPDATE_FREQUENCY_MS } from "../utils";
@@ -70,7 +70,7 @@ const getTextStyle = (widthPercent: number) => {
   return { fontSize: "0.875rem" }; // Default size (text-sm in Tailwind)
 };
 
-export function DayGrid({
+function DayGridComponent({
   timeSlots,
   pCurrentDayStart,
   schedules,
@@ -600,3 +600,5 @@ export function DayGrid({
     </div>
   );
 }
+
+export const DayGrid = memo(DayGridComponent);

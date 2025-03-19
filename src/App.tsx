@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { CronSchedule, TimeSlot } from "./types";
-import { CronScheduleTable } from "./components/CronScheduleTable";
+import { CronSchedulePanel } from "./components/CronScheduleTable";
 import { CalendarManager } from "./components/CalendarManager";
 import { Settings } from "./components/Settings";
 import About from "./components/About";
@@ -62,7 +62,7 @@ export default function App() {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div>
-            <CronScheduleTable
+            <CronSchedulePanel
               schedules={schedules}
               timezone={timezone}
               projectionTimezone={projectionTimezone}
