@@ -1,0 +1,8 @@
+---
+description: Use when fixing bugs
+globs: 
+alwaysApply: false
+---
+# When fixing bugs - Always
+
+– Reuse existing patterns and technologies, exhausting all options for the existing implementation.

@@ -1,0 +1,12 @@
+---
+description: Use when building new features
+globs: 
+alwaysApply: false
+---
+# When building new features
+
+– Prefer simpler solutions
+– Check for other areas of the codebase that might already have similar code and functionality when implementing something, and refactor
+– Write code that takes into account the different environments: dev, test, and prod
+- Always think about what other methods and areas of code might be affected by code changes, suggest these
+- If you add new patterns or technologies, make sure to remove the old implementation afterwards so we don’t have duplicate logic

@@ -1,0 +1,10 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Must Dos - Always
+
+– Keep the codebase very clean and organized
+– Refactor files into utils and abstract away when the files are over 400 lines
+– Only use mock data on test files, never in production code

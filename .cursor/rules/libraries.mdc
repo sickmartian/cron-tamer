@@ -1,0 +1,10 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Library usage
+
+- We are using React with Vite (5.1.6), writting TypeScript, with Tailwind (3.4.1) and PostCSS (8.4.35) for styling
+- Additionally we are using Jest (29.7.0) for tests and Luxon (3.5.0) for sane date parsing and timezone translation
+- Respect the versions of those librearies when looking at documentation and applying code

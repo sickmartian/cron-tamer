@@ -37,7 +37,7 @@ http://localhost:5173/#eyJ0aW1lem9uZSI6IlVUQyIsInByb2plY3Rpb25UaW1lem9uZSI6IlVUQ
 - [x] Current day should be shown differntly in the Calendar
 - [x] Back button should be a calendar icon instead
 - [x] Small jobs should show a smaller text, not skip it
-- [ ] Change title of app and window to user defined one
+- [x] Change title of app and window to user defined one
 - [ ] When long text and long cron exp, we want long text to win
 - [ ] When long text and wrap, we want both lines to be aligned to the left to give the impression of a table
 - [ ] Editing the cron expression and name

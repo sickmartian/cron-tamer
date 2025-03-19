@@ -102,6 +102,7 @@ const serializeState = (state: {
   timezone: string;
   projectionTimezone: string;
   schedules: CronSchedule[];
+  appTitle?: string;
 }) => {
   try {
     // Only include the necessary fields from schedules to keep the URL shorter
@@ -117,7 +118,8 @@ const serializeState = (state: {
     const jsonString = JSON.stringify({
       timezone: state.timezone,
       projectionTimezone: state.projectionTimezone,
-      schedules: minimalSchedules
+      schedules: minimalSchedules,
+      appTitle: state.appTitle
     });
     
     // Use URL-safe base64 encoding (replace characters that need escaping in URLs)
@@ -160,6 +162,8 @@ export default function App() {
   const [hasLoadedFromURL, setHasLoadedFromURL] = useState(false);
   const [shareTooltip, setShareTooltip] = useState("");
   const [showAbout, setShowAbout] = useState(false);
+  const [appTitle, setAppTitle] = useState<string>("Cron Tamer");
+  const [editingTitle, setEditingTitle] = useState(false);
 
   // Load state from URL hash or initialize with demo data
   useEffect(() => {
@@ -181,6 +185,10 @@ export default function App() {
           if (Array.isArray(state.schedules)) {
             setSchedules(state.schedules);
           }
+
+          if (state.appTitle) {
+            setAppTitle(state.appTitle);
+          }
         }
       } else if (!hasVisitedBefore) {
         // First time user, set demo schedules
@@ -194,6 +202,11 @@ export default function App() {
     }
   }, []);
 
+  // Update document title when appTitle changes
+  useEffect(() => {
+    document.title = appTitle || "Cron Tamer";
+  }, [appTitle]);
+
   // Memoize the updateHash function to prevent unnecessary re-renders
   const updateHash = useCallback(() => {
     if (!hasLoadedFromURL) return; // Don't update URL until initial load is complete
@@ -202,6 +215,7 @@ export default function App() {
       timezone,
       projectionTimezone,
       schedules,
+      appTitle
     };
     
     const serialized = serializeState(state);
@@ -212,7 +226,7 @@ export default function App() {
       // Use history.replaceState to avoid adding browser history entries
       window.history.replaceState(null, '', `#${serialized}`);
     }
-  }, [timezone, projectionTimezone, schedules, hasLoadedFromURL]);
+  }, [timezone, projectionTimezone, schedules, hasLoadedFromURL, appTitle]);
 
   // Update URL hash when state changes
   useEffect(() => {
@@ -245,6 +259,7 @@ A tool to visualize and compare cron schedules across different timezones.
 - Collision detection
 - Shareable configurations
 - Detailed day view
+- Customizable application title so you can 'save' multiple environments
 
 ## How to Use
 
@@ -253,6 +268,7 @@ A tool to visualize and compare cron schedules across different timezones.
 3. Click on any day for a detailed view
 4. Change timezones to see how schedules align
 5. Share your configuration using the Share button
+6. Click the app's name to customize it
 
 ## About
 
@@ -276,9 +292,27 @@ It's particularly useful in case different jobs are sharing resources and need t
     <div className="container mx-auto p-4 min-h-screen bg-white dark:bg-gray-900">
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-4">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Cron Tamer
-          </h1>
+          {editingTitle ? (
+            <input
+              type="text"
+              value={appTitle}
+              onChange={(e) => setAppTitle(e.target.value)}
+              onBlur={() => setEditingTitle(false)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') setEditingTitle(false);
+              }}
+              autoFocus
+              className="text-2xl font-bold py-1 px-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white"
+            />
+          ) : (
+            <h1 
+              className="text-2xl font-bold text-gray-900 dark:text-white cursor-pointer hover:text-blue-500 dark:hover:text-blue-400"
+              onClick={() => setEditingTitle(true)}
+              title="Click to edit title"
+            >
+              {appTitle}
+            </h1>
+          )}
           <button
             onClick={() => setShowAbout(true)}
             className="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
