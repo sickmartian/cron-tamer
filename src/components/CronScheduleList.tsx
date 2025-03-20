@@ -279,9 +279,11 @@ function CronScheduleListComponent({
           cronCache = {}; // in case of tz change
           cronCache[timezone] = {};
         }
-        if (!cronCache[timezone][schedule.expression]) {
-          cronCache[timezone][schedule.expression] = {};
-        }
+        // Either the expression exists or it doesn't
+        // if it does it means it has an old cache entry, we can remove it
+        // if it doesn't, we can create a new entry
+        cronCache[timezone][schedule.expression] = {};
+
         occurrences = parseCronExpression(
           schedule.expression,
           currentTime.toJSDate(),

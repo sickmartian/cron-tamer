@@ -26,6 +26,8 @@ http://localhost:5173/#eyJ0aW1lem9uZSI6IlVUQyIsInByb2plY3Rpb25UaW1lem9uZSI6IlVUQ
 - [x] Bad parsing of cron doesn't show a nice error, just fails
 - [x] Dark mode has non-visible text
 - [x] Changing projection inside detailed day view breaks things, see last of month
+- [x] Page title not updated
+- [x] Remove cache when minute changes
 
 ### NTH
 

@@ -216,8 +216,7 @@ function SettingsComponent({
           }
 
           if (state.appTitle) {
-            setAppTitle(state.appTitle);
-            document.title = state.appTitle;
+            changeTitle(state.appTitle);
           }
         }
       }
@@ -227,6 +226,11 @@ function SettingsComponent({
       setHasLoadedFromURL(true);
     }
   }, []);
+
+  const changeTitle = (newTitle: string) => {
+    setAppTitle(newTitle);
+    document.title = newTitle;
+  };
 
   // Handle timezone change
   const handleTimezoneChange = (newTimezone: string) => {
@@ -289,7 +293,7 @@ function SettingsComponent({
             <input
               type="text"
               value={appTitle}
-              onChange={(e) => setAppTitle(e.target.value)}
+              onChange={(e) => changeTitle(e.target.value)}
               onBlur={() => setEditingTitle(false)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === "Escape")
