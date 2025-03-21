@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { CronSchedule } from "../types";
-import { Calendar } from "./Calendar";
+import { CalendarView } from "./CalendarView";
 import { DetailedDayView } from "./DetailedDayView";
 import { generateTimeSlotsForMonth } from "../utils";
 import { DateTime } from "luxon";
@@ -11,7 +11,11 @@ interface CalendarManagerProps {
   projectionTimezone: string;
 }
 
-export function CalendarManager({
+/**
+ * ViewManager is a component that manages the state and transitions between
+ * the calendar view and the detailed day view
+ */
+export function ViewManager({
   schedules,
   timezone,
   projectionTimezone,
@@ -79,7 +83,7 @@ export function CalendarManager({
           onNextDay={handleNextDay}
           />
       ) : (
-        <Calendar
+        <CalendarView
           timezone={timezone}
           projectionTimezone={projectionTimezone}
           currentDate={uCurrentDate}

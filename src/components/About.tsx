@@ -30,6 +30,10 @@ This tool helps you understand how your cron schedules interact with each other 
 It's particularly useful in case different jobs are sharing resources and need to be coordinated.
   `;
 
+/**
+ * About is a component that renders the about page
+ * It contains the information about the app and how to use it
+ */
 export default function About({
   setShowAbout,
 }: {

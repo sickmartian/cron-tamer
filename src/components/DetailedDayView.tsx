@@ -1,7 +1,7 @@
 import { useMemo, useEffect } from "react";
 import { TimeSlot } from "../types";
 import { DateTime, Interval } from "luxon";
-import { DayGrid } from "./DayGrid";
+import { DayGrid } from "./Day";
 import { ChevronLeftIcon, ChevronRightIcon, CalendarIcon } from '@heroicons/react/24/outline';
 
 interface DetailedDayViewProps {
@@ -14,6 +14,10 @@ interface DetailedDayViewProps {
   onNextDay: () => void;
 }
 
+/**
+ * DetailedDayView is a component that renders the detailed view of the selected day
+ * It contains the references to the time (hours and minutes as row and column headers respectively)
+ */
 export function DetailedDayView({
   timeSlots,
   currentDayStart,

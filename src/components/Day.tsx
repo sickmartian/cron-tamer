@@ -69,7 +69,14 @@ const getTextStyle = (widthPercent: number) => {
   return { fontSize: "0.875rem" }; // Default size (text-sm in Tailwind)
 };
 
-function DayGridComponent({
+/**
+ * DayComponent is a component that renders a day of the calendar
+ * It can be in two modes:
+ * - Calendar mode: shows inside multiple days in the calendar view
+ * - Detailed day view: shows inside the selected day in the detailed day view
+ * that contains the references to the time (hours and minutes as row and column headers respectively)
+ */
+function DayComponent({
   timeSlots,
   pCurrentDayStart,
   isDetailedView = false,
@@ -521,7 +528,9 @@ function DayGridComponent({
                     isDetailedView ? "flex items-center justify-center" : ""
                   } ${bar.isCollision ? "border border-yellow-300 z-20" : ""}`}
                   style={{
-                    backgroundColor: bar.isCollision ? "#EF4444" : bar.slot.scheduleColor,
+                    backgroundColor: bar.isCollision
+                      ? "#EF4444"
+                      : bar.slot.scheduleColor,
                     width: `${widthPercent}%`,
                     left: `${startPercent}%`,
                     top: "50%",
@@ -589,4 +598,4 @@ function DayGridComponent({
   );
 }
 
-export const DayGrid = memo(DayGridComponent);
+export const DayGrid = memo(DayComponent);

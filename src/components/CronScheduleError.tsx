@@ -6,6 +6,10 @@ interface CronScheduleErrorProps {
   } | null;
 }
 
+/**
+ * CronScheduleError is a component that renders an error message
+ * It is used to display errors that occur when adding, editing or deleting cron schedules
+ */
 function CronScheduleErrorComponent({ error }: CronScheduleErrorProps) {
   if (!error) return null;
   

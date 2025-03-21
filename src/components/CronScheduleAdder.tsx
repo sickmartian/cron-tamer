@@ -13,6 +13,9 @@ interface CronScheduleAdderProps {
   clearError: () => void;
 }
 
+/**
+ * CronScheduleAdder is a component that allows the user to add a new cron schedule
+ */
 function CronScheduleAdderComponent({
   schedulesLength,
   onAddSchedule,

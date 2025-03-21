@@ -162,6 +162,11 @@ const deserializeState = (hash: string) => {
   }
 };
 
+/**
+ * Settings is a component that allows the user to configure the timezone and projection timezone
+ * It also allows the user to edit the app title.
+ * It centralizes a ton of state in the app so App doesn't have to manage it and re-render all children components.
+ */
 function SettingsComponent({
   onTimezoneChange,
   onProjectionTimezoneChange,

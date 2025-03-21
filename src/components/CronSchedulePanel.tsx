@@ -16,6 +16,9 @@ type ErrorState = {
   message: string;
 };
 
+/**
+ * CronSchedulePanel is a component that allows the user to add, edit and delete cron schedules
+ */
 function CronSchedulePanelComponent({
   schedules,
   timezone,

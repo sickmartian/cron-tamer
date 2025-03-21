@@ -1,5 +1,5 @@
 import { TimeSlot } from "../types";
-import { DayGrid } from "./DayGrid";
+import { DayGrid } from "./Day";
 import { DateTime, Interval } from "luxon";
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 
@@ -12,7 +12,7 @@ interface CalendarProps {
   onDaySelect: (day: DateTime) => void;
 }
 
-export function Calendar({
+export function CalendarView({
   timezone,
   projectionTimezone,
   currentDate,

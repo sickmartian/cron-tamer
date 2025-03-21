@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { CronSchedule } from "./types";
 import { CronSchedulePanel } from "./components/CronSchedulePanel";
-import { CalendarManager } from "./components/CalendarManager";
+import { ViewManager } from "./components/ViewManager";
 import { Settings } from "./components/Settings";
 import About from "./components/About";
 import "./App.css";
@@ -70,7 +70,7 @@ export default function App() {
             />
           </div>
           <div>
-            <CalendarManager
+            <ViewManager
               schedules={schedules}
               timezone={timezone}
               projectionTimezone={projectionTimezone}

@@ -29,6 +29,10 @@ interface InputState {
   expression: { [key: string]: string };
 }
 
+/**
+ * CronScheduleList is a component that renders a list of cron schedules
+ * It allows the user to edit and delete schedules
+ */
 function CronScheduleListComponent({
   schedules,
   timezone,
