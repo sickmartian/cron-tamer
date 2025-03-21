@@ -1,9 +1,8 @@
 import { useState, useEffect, useCallback, useRef, memo } from "react";
-import { CronSchedule } from "../types";
+import { CronSchedule, TimeSlot } from "../types";
 import {
   MAX_DURATION_MINUTES,
   MIN_DURATION_MINUTES,
-  getOccurrecesRelevantForMonth,
   releaseColor,
   TIME_UPDATE_FREQUENCY_MS,
   validateCronExpression,
@@ -15,8 +14,7 @@ const DURATION_DEBOUNCE_MS = 500; // 500ms debounce for duration changes
 
 interface CronScheduleListProps {
   schedules: CronSchedule[];
-  timezone: string;
-  projectionTimezone: string;
+  timeSlots: TimeSlot[];
   onUpdateSchedule: (updatedSchedule: CronSchedule) => void;
   onDeleteSchedule: (scheduleId: string) => void;
   onError: (message: string) => void;
@@ -35,8 +33,7 @@ interface InputState {
  */
 function CronScheduleListComponent({
   schedules,
-  timezone,
-  projectionTimezone,
+  timeSlots,
   onUpdateSchedule,
   onDeleteSchedule,
   onError,
@@ -50,13 +47,11 @@ function CronScheduleListComponent({
     name: {},
     expression: {},
   });
-  const [currentTime, setCurrentTime] = useState<DateTime>(
-    DateTime.now().setZone(projectionTimezone)
-  );
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const [editingSchedule, setEditingSchedule] = useState<{
     [key: string]: { name: boolean; expression: boolean };
   }>({});
+  const [currentlyRunningScheduleIds, setCurrentlyRunningScheduleIds] = useState<string[]>([]);
 
   // Cleanup debounce timers on unmount
   useEffect(() => {
@@ -67,15 +62,16 @@ function CronScheduleListComponent({
 
   // Update current time every minute
   useEffect(() => {
+    calculateCurrentlyRunningSchedules(timeSlots);
     intervalRef.current = setInterval(() => {
-      setCurrentTime(DateTime.now().setZone(projectionTimezone));
+      calculateCurrentlyRunningSchedules(timeSlots);
     }, TIME_UPDATE_FREQUENCY_MS);
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }
     };
-  }, [projectionTimezone]);
+  }, [timeSlots]);
 
   // Initialize input states
   useEffect(() => {
@@ -263,51 +259,13 @@ function CronScheduleListComponent({
     onDeleteSchedule(scheduleId);
   };
 
-  let cronCache: {
-    [tz: string]: {
-      [exp: string]: {
-        [time: string]: DateTime[];
-      };
-    };
-  } = {};
-  const isScheduleRunning = (schedule: CronSchedule): boolean => {
-    try {
-      // We know the cron expression has no second component, so running status is not
-      // changing by the second, but this can be called multiple times per second,
-      // so we need to cache the results
-      const currentTimeNoSeconds = currentTime.toFormat("yyyy-MM-dd HH:mm");
-      if (!currentTimeNoSeconds) return false;
-
-      let occurrences: DateTime[] = [];
-      if (cronCache[timezone]?.[schedule.expression]?.[currentTimeNoSeconds]) {
-        occurrences =
-          cronCache[timezone][schedule.expression][currentTimeNoSeconds];
-      } else {
-        if (!cronCache[timezone]) {
-          cronCache = {}; // in case of tz change
-          cronCache[timezone] = {};
-        }
-        // Either the expression exists or it doesn't
-        // if it does it means it has an old cache entry, we can remove it
-        // if it doesn't, we can create a new entry
-        cronCache[timezone][schedule.expression] = {};
-
-        occurrences = getOccurrecesRelevantForMonth(
-          schedule.expression,
-          currentTime.toJSDate(),
-          timezone
-        );
-        cronCache[timezone][schedule.expression][currentTimeNoSeconds] =
-          occurrences;
-      }
-
-      return occurrences.some((startTime) => {
-        const endTime = startTime.plus({ minutes: schedule.duration });
-        return currentTime >= startTime && currentTime < endTime;
-      });
-    } catch (err) {
-      return false;
-    }
+  const calculateCurrentlyRunningSchedules = (timeSlots: TimeSlot[]) => {
+    const currentTime = DateTime.now();
+    const currentlyRunningScheduleIds = timeSlots.filter((slot) => {
+      const endTime = slot.start.plus({minutes: slot.duration});
+      return currentTime >= slot.start && currentTime < endTime;
+    }).map((slot) => slot.scheduleId);
+    setCurrentlyRunningScheduleIds(currentlyRunningScheduleIds);
   };
 
   return (
@@ -316,7 +274,7 @@ function CronScheduleListComponent({
         <div
           key={schedule.id}
           className={`flex items-center space-x-4 justify-between p-2 border rounded dark:border-gray-700 ${
-            isScheduleRunning(schedule)
+            currentlyRunningScheduleIds.includes(schedule.id)
               ? "ring-2 ring-blue-500 dark:ring-blue-400"
               : ""
           }`}

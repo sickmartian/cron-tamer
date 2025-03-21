@@ -3,9 +3,9 @@ import { CronSchedule } from "./types";
 import { CronSchedulePanel } from "./components/CronSchedulePanel";
 import { ViewManager } from "./components/ViewManager";
 import { Settings } from "./components/Settings";
+import { generateTimeSlotsForMonth } from "./utils";
 import About from "./components/About";
 import "./App.css";
-import { generateTimeSlotsForMonth } from "./utils";
 
 export default function App() {
   const [schedules, setSchedules] = useState<CronSchedule[]>([]);
@@ -75,8 +75,7 @@ export default function App() {
           <div>
             <CronSchedulePanel
               schedules={schedules}
-              timezone={timezone}
-              projectionTimezone={projectionTimezone}
+              timeSlots={timeSlots}
               onSchedulesChange={setSchedules}
             />
           </div>

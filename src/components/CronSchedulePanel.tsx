@@ -1,5 +1,5 @@
 import { useState, useCallback, memo } from "react";
-import { CronSchedule } from "../types";
+import { CronSchedule, TimeSlot } from "../types";
 import { validateCronExpression } from "../utils";
 import { CronScheduleAdder } from "./CronScheduleAdder";
 import { CronScheduleError } from "./CronScheduleError";
@@ -7,8 +7,7 @@ import { CronScheduleList } from "./CronScheduleList";
 
 interface CronScheduleTableProps {
   schedules: CronSchedule[];
-  timezone: string;
-  projectionTimezone: string;
+  timeSlots: TimeSlot[];
   onSchedulesChange: (schedules: CronSchedule[]) => void;
 }
 
@@ -21,8 +20,7 @@ type ErrorState = {
  */
 function CronSchedulePanelComponent({
   schedules,
-  timezone,
-  projectionTimezone,
+  timeSlots,
   onSchedulesChange,
 }: CronScheduleTableProps) {
   const [error, setError] = useState<ErrorState | null>(null);
@@ -95,8 +93,7 @@ function CronSchedulePanelComponent({
 
       <CronScheduleList
         schedules={schedules}
-        timezone={timezone}
-        projectionTimezone={projectionTimezone}
+        timeSlots={timeSlots}
         onUpdateSchedule={handleUpdateSchedule}
         onDeleteSchedule={handleDeleteSchedule}
         onError={handleError}

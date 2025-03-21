@@ -2,7 +2,7 @@ import { DateTime } from "luxon";
 import { CronSchedule, TimeSlot } from "./types";
 import { parseExpression } from "cron-parser";
 
-export const TIME_UPDATE_FREQUENCY_MS = 1000;
+export const TIME_UPDATE_FREQUENCY_MS = 1000 * 10; // 10 seconds
 export const MAX_DURATION_MINUTES = 28 * 24 * 60; // 28 days in minutes
 export const MIN_DURATION_MINUTES = 1;
 
