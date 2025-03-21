@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { CronSchedule } from "../types";
 import { Calendar } from "./Calendar";
 import { DetailedDayView } from "./DetailedDayView";
-import { generateTimeSlots } from "../utils";
+import { generateTimeSlotsForMonth } from "../utils";
 import { DateTime } from "luxon";
 
 interface CalendarManagerProps {
@@ -27,7 +27,7 @@ export function CalendarManager({
 
   // Generate the time slots whenever the schedules, timezone, or displayed month changes
   const timeSlots = useMemo(() => {
-    return generateTimeSlots(schedules, currentDate, timezone);
+    return generateTimeSlotsForMonth(schedules, currentDate, timezone);
   }, [schedules, timezone, displayedMonth, currentDate]);
 
   // Update displayed month when currentDate changes

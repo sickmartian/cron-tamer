@@ -58,7 +58,24 @@ export function releaseColor(color: string) {
   usedColors.delete(color);
 }
 
-export function parseCronExpression(
+export function validateCronExpression(expression: string): boolean {
+  try {
+    parseExpression(expression);
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
+/**
+ * Returns all the occurrences of a cron expression that are relevant for a given month
+ * it includes the ones for the previous month, since we need to be able to see collisions against
+ * long running jobs that span multiple months, max duration is 28 days
+ * @param expression cron expression to parse (e.g. "0 0/1 * * *")
+ * @param targetDate date to check, if not provided, it will use the current date, in the user's timezone
+ * @param timezone timezone to use, if not provided, it will use the default timezone
+ * @returns all the occurrences of the cron expression that are relevant for the given month
+ */
+export function getOccurrecesRelevantForMonth(
   expression: string,
   targetDate: Date = new Date(),
   timezone: string = "UTC"
@@ -121,7 +138,14 @@ export function parseCronExpression(
   return occurrences;
 }
 
-export function generateTimeSlots(
+/**
+ * Generates the time slots for a given month
+ * @param schedules list of schedules to generate the time slots for
+ * @param targetDate date to check, if not provided, it will use the current date, in the user's timezone
+ * @param timezone timezone to use, if not provided, it will use the default timezone
+ * @returns list of time slots for the given month
+ */
+export function generateTimeSlotsForMonth(
   schedules: CronSchedule[],
   targetDate: Date,
   timezone: string = "UTC"
@@ -131,7 +155,7 @@ export function generateTimeSlots(
   schedules.forEach((schedule) => {
     if (!schedule.isActive) return;
 
-    const occurrences = parseCronExpression(
+    const occurrences = getOccurrecesRelevantForMonth(
       schedule.expression,
       targetDate,
       timezone

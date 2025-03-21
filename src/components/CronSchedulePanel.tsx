@@ -1,6 +1,6 @@
 import { useState, useCallback, memo } from "react";
 import { CronSchedule } from "../types";
-import { parseCronExpression } from "../utils";
+import { validateCronExpression } from "../utils";
 import { CronScheduleAdder } from "./CronScheduleAdder";
 import { CronScheduleError } from "./CronScheduleError";
 import { CronScheduleList } from "./CronScheduleList";
@@ -51,7 +51,7 @@ function CronSchedulePanelComponent({
     (updatedSchedule: CronSchedule) => {
       // Validate cron expression
       try {
-        parseCronExpression(updatedSchedule.expression);
+        validateCronExpression(updatedSchedule.expression);
       } catch (err) {
         handleError("Invalid cron expression");
         return;

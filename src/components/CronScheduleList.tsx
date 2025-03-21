@@ -3,9 +3,10 @@ import { CronSchedule } from "../types";
 import {
   MAX_DURATION_MINUTES,
   MIN_DURATION_MINUTES,
-  parseCronExpression,
+  getOccurrecesRelevantForMonth,
   releaseColor,
   TIME_UPDATE_FREQUENCY_MS,
+  validateCronExpression,
 } from "../utils";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { DateTime } from "luxon";
@@ -118,7 +119,7 @@ function CronScheduleListComponent({
 
   const validateExpression = (expression: string): boolean => {
     try {
-      parseCronExpression(expression);
+      validateCronExpression(expression);
       return true;
     } catch (err) {
       onError("Invalid cron expression");
@@ -267,6 +268,9 @@ function CronScheduleListComponent({
   } = {};
   const isScheduleRunning = (schedule: CronSchedule): boolean => {
     try {
+      // We know the cron expression has no second component, so running status is not
+      // changing by the second, but this can be called multiple times per second,
+      // so we need to cache the results
       const currentTimeNoSeconds = currentTime.toFormat("yyyy-MM-dd HH:mm");
       if (!currentTimeNoSeconds) return false;
 
@@ -284,7 +288,7 @@ function CronScheduleListComponent({
         // if it doesn't, we can create a new entry
         cronCache[timezone][schedule.expression] = {};
 
-        occurrences = parseCronExpression(
+        occurrences = getOccurrecesRelevantForMonth(
           schedule.expression,
           currentTime.toJSDate(),
           timezone

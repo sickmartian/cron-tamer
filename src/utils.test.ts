@@ -1,6 +1,6 @@
-import { parseCronExpression } from "./utils";
+import { getOccurrecesRelevantForMonth, validateCronExpression } from "./utils";
 
-describe("parseCronExpression", () => {
+describe("getOccurrecesRelevantForMonth", () => {
   it.each([
     // DST
     { case: 'DST', tz: "UTC", expression: "0 2 30 3 *" },
@@ -22,7 +22,7 @@ describe("parseCronExpression", () => {
   ])(
     "should parse cron expressions correctly for case $case in $tz with $expression",
     ({ tz, expression }) => {
-      const occurrences = parseCronExpression(
+      const occurrences = getOccurrecesRelevantForMonth(
         expression,
         new Date("2025-03-14T04:00:00"),
         tz
@@ -32,6 +32,15 @@ describe("parseCronExpression", () => {
     }
   );
   it("should throw an error if the cron expression is invalid", () => {
-    expect(() => parseCronExpression("invalid", new Date("2025-03-14T04:00:00"), "UTC")).toThrow();
+    expect(() => getOccurrecesRelevantForMonth("invalid", new Date("2025-03-14T04:00:00"), "UTC")).toThrow();
+  });
+});
+
+describe("validateCronExpression", () => {
+  it("should return true if the cron expression is valid", () => {
+    expect(validateCronExpression("0 0/1 * * *")).toBe(true);
+  });
+  it("should return false if the cron expression is invalid", () => {
+    expect(validateCronExpression("invalid")).toBe(false);
   });
 });

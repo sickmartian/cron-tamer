@@ -4,7 +4,6 @@ import {
   generateColor,
   MAX_DURATION_MINUTES,
   MIN_DURATION_MINUTES,
-  parseCronExpression,
 } from "../utils";
 
 interface CronScheduleAdderProps {
@@ -29,7 +28,7 @@ function CronScheduleAdderComponent({
 
   const validateCronExpression = (expression: string): boolean => {
     try {
-      parseCronExpression(expression);
+      validateCronExpression(expression);
       return true;
     } catch (err) {
       onError("Invalid cron expression", "new-expression");
