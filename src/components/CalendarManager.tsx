@@ -19,24 +19,10 @@ export function CalendarManager({
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState<DateTime | null>(null);
 
-  // Track the currently displayed month to detect changes
-  const [displayedMonth, setDisplayedMonth] = useState({
-    year: currentDate.getFullYear(),
-    month: currentDate.getMonth(),
-  });
-
   // Generate the time slots whenever the schedules, timezone, or displayed month changes
   const timeSlots = useMemo(() => {
     return generateTimeSlotsForMonth(schedules, currentDate, timezone);
-  }, [schedules, timezone, displayedMonth, currentDate]);
-
-  // Update displayed month when currentDate changes
-  useEffect(() => {
-    setDisplayedMonth({
-      year: currentDate.getFullYear(),
-      month: currentDate.getMonth(),
-    });
-  }, [currentDate]);
+  }, [schedules, timezone, currentDate]);
 
   // Handle setting a new currentDate, ensuring it updates when changing months
   const handleSetCurrentDate = (date: Date) => {
