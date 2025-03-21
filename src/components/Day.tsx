@@ -535,7 +535,7 @@ function DayComponent({
                     left: `${startPercent}%`,
                     top: "50%",
                     transform: "translateY(-50%)",
-                    zIndex: bar.isCollision ? 20 : 10,
+                    zIndex: isSelected ? 30 : bar.isCollision ? 20 : 10,
                   }}
                   title={getBarTitle(bar)}
                   onClick={(e) => handleBarClick(e, bar, barKey)}
