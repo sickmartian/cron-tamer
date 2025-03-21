@@ -123,8 +123,14 @@ function DayComponent({
     const handleClickOutside = (event: MouseEvent) => {
       // Check if click was outside the popover
       if (
+        // not on the popover itself
         popoverRef.current &&
-        !popoverRef.current.contains(event.target as Node)
+        !popoverRef.current.contains(event.target as Node) &&
+        // not on a bar of the selected slot
+        // (we need to keep this so the bar code can do the toggle for us)
+        event.target instanceof HTMLElement &&
+        (!(event.target.getAttribute("data-bar") === "true") ||
+          !(event.target.getAttribute("data-slot-key") === selectedSlot?.key))
       ) {
         setPopover(null);
         setSelectedSlot(null);
@@ -527,6 +533,7 @@ function DayComponent({
                   } ${
                     isDetailedView ? "flex items-center justify-center" : ""
                   } ${bar.isCollision ? "border border-yellow-300 z-20" : ""}`}
+                  data-slot-key={bar.slot.key}
                   style={{
                     backgroundColor: bar.isCollision
                       ? "#EF4444"
