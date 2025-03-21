@@ -1,10 +1,11 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { CronSchedule } from "./types";
 import { CronSchedulePanel } from "./components/CronSchedulePanel";
 import { ViewManager } from "./components/ViewManager";
 import { Settings } from "./components/Settings";
 import About from "./components/About";
 import "./App.css";
+import { generateTimeSlotsForMonth } from "./utils";
 
 export default function App() {
   const [schedules, setSchedules] = useState<CronSchedule[]>([]);
@@ -13,6 +14,16 @@ export default function App() {
     Intl.DateTimeFormat().resolvedOptions().timeZone
   );
   const [showAbout, setShowAbout] = useState(false);
+  const [uCurrentDate, setUCurrentDate] = useState(new Date());
+
+  // Generate the time slots whenever the schedules, timezone or current date changes
+  const timeSlots = useMemo(() => {
+    return generateTimeSlotsForMonth(schedules, uCurrentDate, timezone);
+  }, [schedules, timezone, uCurrentDate]);
+
+  const handleCurrentUDateChange = useCallback((newUCurrentDate: Date) => {
+    setUCurrentDate(newUCurrentDate);
+  }, []);
 
   // Memoize handlers to prevent unnecessary re-renders
   const handleTimezoneChange = useCallback((newTimezone: string) => {
@@ -71,9 +82,11 @@ export default function App() {
           </div>
           <div>
             <ViewManager
-              schedules={schedules}
               timezone={timezone}
               projectionTimezone={projectionTimezone}
+              timeSlots={timeSlots}
+              uCurrentDate={uCurrentDate}
+              setUCurrentDate={handleCurrentUDateChange}
             />
           </div>
         </div>

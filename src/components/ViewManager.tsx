@@ -1,14 +1,15 @@
-import { useState, useMemo } from "react";
-import { CronSchedule } from "../types";
+import { useState } from "react";
 import { CalendarView } from "./CalendarView";
 import { DetailedDayView } from "./DetailedDayView";
-import { generateTimeSlotsForMonth } from "../utils";
 import { DateTime } from "luxon";
+import { TimeSlot } from "../types";
 
 interface CalendarManagerProps {
-  schedules: CronSchedule[];
   timezone: string;
   projectionTimezone: string;
+  timeSlots: TimeSlot[];
+  uCurrentDate: Date;
+  setUCurrentDate: (date: Date) => void;
 }
 
 /**
@@ -16,17 +17,13 @@ interface CalendarManagerProps {
  * the calendar view and the detailed day view
  */
 export function ViewManager({
-  schedules,
   timezone,
   projectionTimezone,
+  timeSlots,
+  uCurrentDate,
+  setUCurrentDate,
 }: CalendarManagerProps) {
-  const [uCurrentDate, setUCurrentDate] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState<DateTime | null>(null);
-
-  // Generate the time slots whenever the schedules, timezone, or displayed month changes
-  const timeSlots = useMemo(() => {
-    return generateTimeSlotsForMonth(schedules, uCurrentDate, timezone);
-  }, [schedules, timezone, uCurrentDate]);
 
   const handleSetCurrentDate = (date: Date) => {
     setUCurrentDate(date);
