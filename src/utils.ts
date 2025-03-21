@@ -167,6 +167,7 @@ export function generateTimeSlotsForMonth(
         duration: schedule.duration,
         scheduleId: schedule.id,
         scheduleName: schedule.name,
+        scheduleColor: schedule.color,
         key: `${schedule.id}-${start.toString()}`,
       });
     });

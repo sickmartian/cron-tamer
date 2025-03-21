@@ -1,12 +1,11 @@
 import { useMemo, useState, useEffect, useRef, memo } from "react";
-import { TimeSlot, CronSchedule } from "../types";
+import { TimeSlot } from "../types";
 import { DateTime } from "luxon";
 import { TIME_UPDATE_FREQUENCY_MS } from "../utils";
 
 interface DayGridProps {
   timeSlots: TimeSlot[];
   pCurrentDayStart: DateTime;
-  schedules: CronSchedule[];
   isDetailedView?: boolean;
 }
 
@@ -73,7 +72,6 @@ const getTextStyle = (widthPercent: number) => {
 function DayGridComponent({
   timeSlots,
   pCurrentDayStart,
-  schedules,
   isDetailedView = false,
 }: DayGridProps) {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -138,16 +136,6 @@ function DayGridComponent({
       setPopover(null);
     }
   }, [selectedSlot]);
-
-  const getSlotStyle = (slot: TimeSlot, isCollision = false) => {
-    if (isCollision) {
-      return { backgroundColor: "#EF4444" }; // Red color for collisions
-    }
-
-    const schedule = schedules.find((s) => s.id === slot.scheduleId);
-    if (!schedule) return { backgroundColor: "#9CA3AF" };
-    return { backgroundColor: schedule.color };
-  };
 
   // Pre-calculate all bars for all slots and handle collisions
   const slotBars = useMemo(() => {
@@ -533,7 +521,7 @@ function DayGridComponent({
                     isDetailedView ? "flex items-center justify-center" : ""
                   } ${bar.isCollision ? "border border-yellow-300 z-20" : ""}`}
                   style={{
-                    ...getSlotStyle(bar.slot, bar.isCollision),
+                    backgroundColor: bar.isCollision ? "#EF4444" : bar.slot.scheduleColor,
                     width: `${widthPercent}%`,
                     left: `${startPercent}%`,
                     top: "50%",

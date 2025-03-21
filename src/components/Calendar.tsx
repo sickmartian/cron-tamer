@@ -1,10 +1,9 @@
-import { CronSchedule, TimeSlot } from "../types";
+import { TimeSlot } from "../types";
 import { DayGrid } from "./DayGrid";
 import { DateTime, Interval } from "luxon";
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 
 interface CalendarProps {
-  schedules: CronSchedule[];
   timezone: string;
   projectionTimezone: string;
   currentDate: Date;
@@ -14,7 +13,6 @@ interface CalendarProps {
 }
 
 export function Calendar({
-  schedules,
   timezone,
   projectionTimezone,
   currentDate,
@@ -134,7 +132,6 @@ export function Calendar({
               <DayGrid
                 timeSlots={daySlots}
                 pCurrentDayStart={currentDayStart}
-                schedules={schedules}
               />
             </div>
           );

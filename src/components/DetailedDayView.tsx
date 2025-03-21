@@ -1,5 +1,5 @@
 import { useMemo, useEffect } from "react";
-import { CronSchedule, TimeSlot } from "../types";
+import { TimeSlot } from "../types";
 import { DateTime, Interval } from "luxon";
 import { DayGrid } from "./DayGrid";
 import { ChevronLeftIcon, ChevronRightIcon, CalendarIcon } from '@heroicons/react/24/outline';
@@ -7,7 +7,6 @@ import { ChevronLeftIcon, ChevronRightIcon, CalendarIcon } from '@heroicons/reac
 interface DetailedDayViewProps {
   timeSlots: TimeSlot[];
   currentDayStart: DateTime;
-  schedules: CronSchedule[];
   timezone: string;
   projectionTimezone: string;
   onBackToCalendar: () => void;
@@ -18,7 +17,6 @@ interface DetailedDayViewProps {
 export function DetailedDayView({
   timeSlots,
   currentDayStart,
-  schedules,
   timezone,
   projectionTimezone,
   onBackToCalendar,
@@ -148,7 +146,6 @@ export function DetailedDayView({
             <DayGrid
               timeSlots={daySlots}
               pCurrentDayStart={projectedDay}
-              schedules={schedules}
               isDetailedView={true}
             />
           </div>

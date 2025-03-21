@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { CronSchedule } from "../types";
 import { Calendar } from "./Calendar";
 import { DetailedDayView } from "./DetailedDayView";
@@ -16,26 +16,16 @@ export function CalendarManager({
   timezone,
   projectionTimezone,
 }: CalendarManagerProps) {
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [uCurrentDate, setUCurrentDate] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState<DateTime | null>(null);
 
   // Generate the time slots whenever the schedules, timezone, or displayed month changes
   const timeSlots = useMemo(() => {
-    return generateTimeSlotsForMonth(schedules, currentDate, timezone);
-  }, [schedules, timezone, currentDate]);
+    return generateTimeSlotsForMonth(schedules, uCurrentDate, timezone);
+  }, [schedules, timezone, uCurrentDate]);
 
-  // Handle setting a new currentDate, ensuring it updates when changing months
   const handleSetCurrentDate = (date: Date) => {
-    // Check if the month has changed
-    if (
-      date.getMonth() !== currentDate.getMonth() ||
-      date.getFullYear() !== currentDate.getFullYear()
-    ) {
-      // Update the current date which will trigger the displayedMonth update
-      setCurrentDate(date);
-    } else {
-      setCurrentDate(date);
-    }
+    setUCurrentDate(date);
   };
 
   const handleDaySelect = (date: DateTime) => {
@@ -82,7 +72,6 @@ export function CalendarManager({
         <DetailedDayView
           timeSlots={timeSlots}
           currentDayStart={selectedDay}
-          schedules={schedules}
           projectionTimezone={projectionTimezone}
           timezone={timezone}
           onBackToCalendar={handleBackToCalendar}
@@ -91,10 +80,9 @@ export function CalendarManager({
           />
       ) : (
         <Calendar
-          schedules={schedules}
           timezone={timezone}
           projectionTimezone={projectionTimezone}
-          currentDate={currentDate}
+          currentDate={uCurrentDate}
           timeSlots={timeSlots}
           setCurrentDate={handleSetCurrentDate}
           onDaySelect={handleDaySelect}

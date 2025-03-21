@@ -19,6 +19,7 @@ export interface TimeSlot {
   key: string;
   scheduleId: string;
   scheduleName: string;
+  scheduleColor: string;
   start: DateTime;
   duration: number; // Duration in minutes
 }
